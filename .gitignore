@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+# builds / artifacts
+dist/
+build/
+out/
+cache/
+broadcast/
+.next/
+.ponder/
+coverage/
+artifacts/
+contracts/generated/
+*.tsbuildinfo
+# env / secrets — never commit
+.env
+.env.*
+!.env.example
+*.key
+*keystore*
+# local/session state
+deployments/robin-local.json
+deployments/.rehearsal-*
+internal/
+*.log
+.DS_Store

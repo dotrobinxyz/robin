@@ -1,0 +1,39 @@
+{
+  "name": "robin-names",
+  "version": "0.1.0",
+  "description": "Resolve and register .robin names on Robinhood Chain — ENS-standard resolution with a one-line viem config.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "sync-artifacts": "node scripts/sync-artifacts.mjs",
+    "test": "node --test test/resolution.test.mjs"
+  },
+  "peerDependencies": {
+    "viem": ">=2.30.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "viem": "^2.33.3"
+  },
+  "keywords": [
+    "robin",
+    "robinhood-chain",
+    "ens",
+    "naming",
+    "viem"
+  ]
+}

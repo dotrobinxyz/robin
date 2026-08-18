@@ -1,0 +1,17 @@
+{
+  "_comment": "Robinhood Chain testnet (chainId 46630). Shortened timers so the full lifecycle \u2014 register \u2192 wrap \u2192 subdomains \u2192 transfer \u2192 expiry \u2192 grace \u2192 premium auction \u2192 re-registration \u2014 can be rehearsed on a live chain: 30-minute grace, 2-day premium decay, 3-day promo window. Mock USDG and ETH/USD feed are deployed automatically (zero addresses below).",
+  "usdg": "0x0000000000000000000000000000000000000000",
+  "ethUsdFeed": "0x0000000000000000000000000000000000000000",
+  "mockEthPriceUSD8": 200000000000,
+  "gracePeriod": 1800,
+  "maxFeedAge": 31536000,
+  "minCommitmentAge": 60,
+  "maxCommitmentAge": 86400,
+  "premiumStartAttoUSD": 1000000000000000000000,
+  "premiumDays": 2,
+  "promoDurationSeconds": 259200,
+  "batchGatewayUrl": "https://ccip-v2.ens.xyz",
+  "finalOwner": "0x0000000000000000000000000000000000000000",
+  "isMainnet": false,
+  "minRegistrationDuration": 3600
+}
