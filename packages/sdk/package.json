@@ -3,6 +3,16 @@
   "version": "0.1.0",
   "description": "Resolve and register .robin names on Robinhood Chain — ENS-standard resolution with a one-line viem config.",
   "license": "MIT",
+  "author": "dotrobinxyz",
+  "homepage": "https://docs.dotrobin.xyz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotrobinxyz/robin.git",
+    "directory": "packages/sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/dotrobinxyz/robin/issues"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
