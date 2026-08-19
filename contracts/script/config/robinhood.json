@@ -11,7 +11,7 @@
   "premiumDays": 21,
   "promoDurationSeconds": 1209600,
   "batchGatewayUrl": "https://ccip-v2.ens.xyz",
-  "finalOwner": "0x0000000000000000000000000000000000000000",
+  "finalOwner": "0xD0d82499Bfbbc5D92d31BDc46d31d1Fd3eA50a71",
   "isMainnet": true,
   "minRegistrationDuration": 2419200
 }
