@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>robin docs — integrate .robin names</title>
+<meta name="description" content="Integrate .robin names on Robinhood Chain. ENS-standard resolution — one config line for viem, wagmi, and ethers. Agent identity, indexed data, contract addresses." />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="robin docs — integrate .robin names" />
+<meta property="og:description" content="ENS-standard resolution on Robinhood Chain. One config line." />
+<meta property="og:url" content="https://docs.dotrobin.xyz" />
+<meta property="og:image" content="https://docs.dotrobin.xyz/og-default.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --green: #ccff00;
+  --charcoal: #2a2622;
+  --buff: #f1eadf;
+  --grey: #8c8578;
+  --blue: #9fb0ba;
+  --night: #1a1714;
+  --hairline: rgba(140, 133, 120, 0.4);
+  --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --ui: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Menlo, monospace;
+  --r-card: 20px;
+  --r-pill: 999px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--buff); color: var(--charcoal);
+  font-family: var(--ui); font-size: 16px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--charcoal); }
+a:hover { color: var(--grey); }
+.shell { width: 100%; max-width: 760px; margin: 0 auto; padding: 0 20px 64px; }
+
+/* top bar */
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--buff) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--hairline);
+}
+.topbar-inner {
+  max-width: 760px; margin: 0 auto; padding: 12px 20px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+.wordmark { font-family: var(--display); font-weight: 700; font-size: 21px; letter-spacing: -0.02em; }
+.docs-tag {
+  font-family: var(--mono); font-size: 12px; color: var(--charcoal);
+  background: var(--green); border-radius: var(--r-pill); padding: 2px 10px;
+}
+.topnav { display: flex; gap: 14px; margin-left: auto; flex-wrap: wrap; }
+.topnav a { text-decoration: none; font-size: 14px; color: var(--grey); }
+.topnav a:hover { color: var(--charcoal); }
+
+/* type */
+h1 {
+  font-family: var(--display); font-weight: 700; letter-spacing: -0.02em;
+  font-size: clamp(34px, 7vw, 52px); line-height: 1.05; margin: 48px 0 14px;
+}
+h2 {
+  font-family: var(--display); font-weight: 700; letter-spacing: -0.015em;
+  font-size: 27px; margin: 56px 0 10px; padding-top: 18px;
+  border-top: 1px solid var(--hairline);
+}
+h3 { font-family: var(--display); font-weight: 500; font-size: 19px; margin: 26px 0 6px; }
+p { margin: 10px 0; }
+.lede { font-size: 18px; color: var(--charcoal); max-width: 56ch; }
+.muted { color: var(--grey); }
+.small { font-size: 14px; }
+strong { font-weight: 600; }
+
+/* band chip — the signature. label+suffix contiguous. */
+.band {
+  display: inline-flex; align-items: baseline; white-space: nowrap;
+  font-family: var(--mono); font-weight: 500;
+  border-radius: var(--r-pill); padding: 4px 14px;
+  border: 1.5px solid var(--charcoal); background: transparent;
+}
+.band .sfx { opacity: 0.55; }
+.band.night { background: var(--night); border-color: var(--night); color: var(--buff); }
+.band.night .sfx { color: var(--green); opacity: 1; }
+
+/* code */
+pre {
+  background: var(--night); color: var(--buff);
+  font-family: var(--mono); font-size: 13.5px; line-height: 1.55;
+  border-radius: var(--r-card); padding: 18px 20px;
+  overflow-x: auto; margin: 14px 0;
+}
+pre .c { color: var(--grey); }        /* comment */
+pre .g { color: var(--green); }       /* the load-bearing line */
+pre .b { color: var(--blue); }        /* strings / values */
+code {
+  font-family: var(--mono); font-size: 0.92em;
+  background: rgba(140, 133, 120, 0.16); border-radius: 6px; padding: 1px 6px;
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+
+/* cards, tables, lists */
+.card {
+  border: 1px solid var(--hairline); border-radius: var(--r-card);
+  padding: 16px 20px; margin: 14px 0; background: rgba(255, 255, 255, 0.35);
+}
+.tablewrap { overflow-x: auto; border: 1px solid var(--hairline); border-radius: var(--r-card); margin: 14px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--hairline); }
+tr:last-child td { border-bottom: none; }
+th { font-weight: 600; font-size: 13px; color: var(--grey); }
+td code, td a { font-family: var(--mono); font-size: 12.5px; text-decoration: none; }
+ol, ul { padding-left: 22px; }
+li { margin: 6px 0; }
+li::marker { color: var(--grey); }
+
+/* footer — mirrors the app */
+footer {
+  background: var(--night); color: var(--buff); margin-top: 72px;
+}
+.footer-inner { max-width: 760px; margin: 0 auto; padding: 34px 20px 44px; }
+.footer-inner a { color: var(--buff); text-decoration: none; }
+.footer-inner a:hover { color: var(--green); }
+.footer-brand { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.footer-brand .wordmark { color: var(--buff); }
+.footer-links { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; margin-top: 14px; }
+@media (max-width: 560px) { .topnav { gap: 10px; } h2 { font-size: 23px; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="https://dotrobin.xyz">
+      <img src="robin-mark-light.svg" alt="" width="26" height="26" />
+      <span class="wordmark">robin</span>
+    </a>
+    <span class="docs-tag">docs</span>
+    <nav class="topnav">
+      <a href="#integrate">integrate</a>
+      <a href="#indexed">indexed data</a>
+      <a href="#agents">agents</a>
+      <a href="#addresses">addresses</a>
+    </nav>
+  </div>
+</div>
+
+<div class="shell">
+
+<h1>Integrate .robin names.</h1>
+<p class="lede">
+  Robin is the ENS-standard naming layer for Robinhood Chain. It implements the
+  exact ENS interfaces — ERC-137 registry, standard resolver profiles, ENSIP
+  namehash, reverse records, a UniversalResolver — so
+  <strong>the ENS tooling you already use works unchanged</strong>.
+  Integration is a config line, not an SDK adoption project.
+</p>
+<p>
+  The highest-leverage integration is <strong>reverse resolution</strong>:
+  wherever your UI renders <code>0x71C7…9F2b</code>, render
+  <span class="band night">trader<span class="sfx">.robin</span></span> instead.
+</p>
+
+<h2 id="integrate">viem / wagmi — one line.</h2>
+<pre><code><span class="c">import</span> { createPublicClient, http } <span class="c">from</span> <span class="b">"viem"</span>;
+<span class="g">import { robinhoodChainTestnet } from "robin-names"; // ← the one line</span>
+
+<span class="c">const</span> client = createPublicClient({ chain: robinhoodChainTestnet, transport: http() });
+
+<span class="c">// reverse: address → name (do this in your UI)</span>
+<span class="c">await</span> client.getEnsName({ address: <span class="b">"0x71C7656EC7ab88b098defB751B7401B5f6d8976F"</span> });
+<span class="c">// → "trader.robin"</span>
+
+<span class="c">// forward: name → address (payments, transfers, search)</span>
+<span class="c">await</span> client.getEnsAddress({ name: <span class="b">"trader.robin"</span> });
+
+<span class="c">// profile records</span>
+<span class="c">await</span> client.getEnsText({ name: <span class="b">"trader.robin"</span>, key: <span class="b">"com.twitter"</span> });
+<span class="c">await</span> client.getEnsAvatar({ name: <span class="b">"trader.robin"</span> });</code></pre>
+<p>
+  With wagmi, pass the chain into your config and use the stock hooks —
+  <code>useEnsName</code>, <code>useEnsAddress</code>, <code>useEnsText</code>,
+  <code>useEnsAvatar</code>. Nothing else changes. Already have your own chain
+  object? Wrap it: <code>withRobin(myChainConfig)</code>.
+</p>
+<p class="small muted">
+  The <code>robin-names</code> SDK lives at
+  <a href="https://github.com/dotrobinxyz/robin/tree/main/packages/sdk">packages/sdk</a>
+  in the repo.
+</p>
+
+<h3>Without the SDK.</h3>
+<p>
+  The SDK is convenience, not dependency. Point any ENS-aware library at
+  Robin's registry and UniversalResolver — addresses
+  <a href="#addresses">below</a>, verified on Blockscout:
+</p>
+<pre><code><span class="c">import</span> { defineChain } <span class="c">from</span> <span class="b">"viem"</span>;
+
+<span class="c">const</span> robinhoodTestnet = defineChain({
+  id: <span class="b">46630</span>,
+  name: <span class="b">"Robinhood Chain Testnet"</span>,
+  nativeCurrency: { name: <span class="b">"Ether"</span>, symbol: <span class="b">"ETH"</span>, decimals: <span class="b">18</span> },
+  rpcUrls: { default: { http: [<span class="b">"https://rpc.testnet.chain.robinhood.com"</span>] } },
+  contracts: {
+<span class="g">    ensRegistry: { address: "0x8705DEC51223E119C5C9f03121626d086A8eF753" },</span>
+<span class="g">    ensUniversalResolver: { address: "0x7112730612e4253Ba2e418A86580615A2c3CDB1D" },</span>
+    multicall3: { address: <span class="b">"0xcA11bde05977b3631167028862bE2a173976CA11"</span> },
+  },
+});</code></pre>
+<p>
+  ethers v6:
+  <code>new JsonRpcProvider(rpc, { chainId: 46630, name: "robinhood-testnet", ensAddress: "0x8705…F753" })</code>.
+</p>
+
+<h3>Solidity — resolve on-chain.</h3>
+<pre><code><span class="c">// Forward-resolve in a contract via the registry (ERC-137):</span>
+ENS registry = ENS(<span class="b">0x8705DEC51223E119C5C9f03121626d086A8eF753</span>);
+address resolver = registry.resolver(node);
+address target = Resolver(resolver).addr(node);</code></pre>
+<p>
+  Or call <code>UniversalResolver.resolve(dnsEncodedName, calldata)</code> for
+  one-call resolution including wildcard support.
+</p>
+
+<h3>UX rules — match ENS behaviour so users trust the result.</h3>
+<ol>
+  <li><strong>Always forward-check the reverse.</strong> After
+    <code>getEnsName(address)</code>, confirm <code>getEnsAddress(thatName)</code>
+    returns the same address before displaying it (viem does this for you).</li>
+  <li><strong>Normalize before hashing.</strong> Use ENSIP-15
+    (<code>normalize</code> from <code>robin-names</code> or
+    <code>viem/ens</code>) on any user-typed name.</li>
+  <li><strong>Names expire.</strong> A resolved name is valid <em>now</em>;
+    don't cache it beyond your normal UI cache windows.</li>
+</ol>
+
+<h2 id="indexed">Indexed data.</h2>
+<p>
+  For lists and search — names by owner, expiries, activity, auctions — the
+  public GraphQL endpoint serves the chain's naming state:
+</p>
+<p><span class="band">api.dotrobin.xyz<span class="sfx">/graphql</span></span></p>
+<pre><code>curl -s <span class="b">https://api.dotrobin.xyz/graphql</span> \
+  -H <span class="b">"content-type: application/json"</span> \
+  -d <span class="b">'{"query":"{ names(orderBy: \"expiresAt\", orderDirection: \"desc\", limit: 20) { items { label owner expiresAt wrapped } totalCount } }"}'</span></code></pre>
+<p>
+  CORS is open — call it straight from your dapp. Schema:
+  <a href="https://github.com/dotrobinxyz/robin/blob/main/indexer/ponder.schema.ts">indexer/ponder.schema.ts</a>.
+  Self-hosting is one command (<code>ponder start</code>) against any
+  Robinhood Chain RPC.
+</p>
+
+<h2 id="agents">Name your agents.</h2>
+<p>
+  Robinhood Chain is built for agentic trading. Agents transact, hold funds,
+  and talk to each other — they need what every actor on a chain needs:
+  <strong>an addressable, verifiable identity</strong>. One parent name per
+  operator; one subname per agent:
+</p>
+<p><span class="band night">bot1.goldfinch<span class="sfx">.robin</span></span>
+   <span class="muted small">→ the agent's smart account</span></p>
+<ol>
+  <li>
+    <strong>Register and wrap your operator name.</strong>
+    <code>goldfinch.robin</code> → wrap it (one click in the
+    <a href="https://dotrobin.xyz">app</a>, or <code>RobinWrapper.wrapETH2LD</code>).
+    Wrapping turns your name into a parent that can issue subname tokens.
+  </li>
+  <li>
+    <strong>Issue a subname per agent.</strong> Subnames are real ERC-1155
+    tokens — transferable, sellable, revocable like any asset.
+<pre><code>RobinWrapper.setSubnodeOwner(
+  namehash(<span class="b">"goldfinch.robin"</span>),
+  <span class="b">"bot1"</span>,
+  agentAccount,  <span class="c">// the agent's ERC-4337 smart account</span>
+  <span class="b">0</span>,             <span class="c">// fuses — or PARENT_CANNOT_CONTROL to emancipate</span>
+  <span class="b">0</span>
+)</code></pre>
+    Then point it at the agent:
+    <code>PublicResolver.setAddr(node, agentAccount)</code>.
+  </li>
+  <li>
+    <strong>Give the agent a capability card — text records.</strong>
+    Machine-readable profile, readable by any counterparty with one call:
+    <div class="tablewrap"><table>
+      <tr><th>key</th><th>value</th></tr>
+      <tr><td><code>url</code></td><td>the agent's API / A2A endpoint</td></tr>
+      <tr><td><code>description</code></td><td>what this agent does</td></tr>
+      <tr><td><code>agent.capabilities</code></td><td>comma-separated verbs: <code>swap,lend,rebalance</code></td></tr>
+      <tr><td><code>agent.model</code></td><td>model / runtime identifier</td></tr>
+      <tr><td><code>agent.operator</code></td><td><code>goldfinch.robin</code> — walk up to the human</td></tr>
+      <tr><td><code>avatar</code></td><td>image URI</td></tr>
+    </table></div>
+  </li>
+  <li>
+    <strong>Set the agent's primary name.</strong> The agent's account calls
+    <code>ReverseRegistrar.setName("bot1.goldfinch.robin")</code> (or use
+    <code>setNameForAddr</code> while you control it). Every explorer and dapp
+    that renders reverse resolution now shows the agent's name.
+  </li>
+</ol>
+
+<h3>Verify a counterparty agent.</h3>
+<pre><code><span class="c">import</span> { createPublicClient, http } <span class="c">from</span> <span class="b">"viem"</span>;
+<span class="c">import</span> { robinhoodChainTestnet, namehash } <span class="c">from</span> <span class="b">"robin-names"</span>;
+
+<span class="c">const</span> client = createPublicClient({ chain: robinhoodChainTestnet, transport: http() });
+
+<span class="c">async function</span> verifyAgent(claimedName, senderAddress) {
+  <span class="c">const</span> resolved = <span class="c">await</span> client.getEnsAddress({ name: claimedName });
+  <span class="c">if</span> (resolved?.toLowerCase() !== senderAddress.toLowerCase()) <span class="c">return</span> null;
+  <span class="c">const</span> operator = claimedName.split(<span class="b">"."</span>).slice(<span class="b">1</span>).join(<span class="b">"."</span>);
+  <span class="c">const</span> endpoint = <span class="c">await</span> client.getEnsText({ name: claimedName, key: <span class="b">"url"</span> });
+  <span class="c">const</span> capabilities = <span class="c">await</span> client.getEnsText({ name: claimedName, key: <span class="b">"agent.capabilities"</span> });
+  <span class="c">return</span> { operator, endpoint, capabilities };
+}</code></pre>
+<div class="card small">
+  <strong>Why this beats a registry contract or an off-chain list.</strong>
+  Verifiable delegation — <code>bot1.goldfinch.robin</code> cryptographically
+  hangs off <code>goldfinch.robin</code>, so counterparties can walk the
+  namehash chain to the operator. Revocable — keep the parent's control fuses
+  and you can replace a compromised agent's subname; emancipate it and the
+  identity is provably the agent's own. Composable — every wallet, explorer,
+  and agent framework that speaks ENS resolves it with zero custom code.
+  Tradeable — a wrapped subname (the agent's name, reputation, endpoint) can
+  change operators atomically.
+</div>
+
+<h2 id="addresses">Addresses.</h2>
+<p>
+  Robinhood Chain testnet, chainId <code>46630</code> — live now, verified on
+  <a href="https://explorer.testnet.chain.robinhood.com">Blockscout</a>.
+  Free testnet ETH:
+  <a href="https://faucet.testnet.chain.robinhood.com">faucet.testnet.chain.robinhood.com</a>.
+</p>
+<div class="tablewrap"><table>
+  <tr><th>contract</th><th>address</th></tr>
+  <tr><td>RobinRegistry</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x8705DEC51223E119C5C9f03121626d086A8eF753">0x8705DEC51223E119C5C9f03121626d086A8eF753</a></td></tr>
+  <tr><td>UniversalResolver</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x7112730612e4253Ba2e418A86580615A2c3CDB1D">0x7112730612e4253Ba2e418A86580615A2c3CDB1D</a></td></tr>
+  <tr><td>PublicResolver</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x293758cf47CE956fbeD160E54259Af2549faa090">0x293758cf47CE956fbeD160E54259Af2549faa090</a></td></tr>
+  <tr><td>ReverseRegistrar</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x818145E450422484c240a7294de5f71e3A39e4F4">0x818145E450422484c240a7294de5f71e3A39e4F4</a></td></tr>
+  <tr><td>RobinRegistrarController</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x042C39d404C58528963E691a6befC905511a3Dcb">0x042C39d404C58528963E691a6befC905511a3Dcb</a></td></tr>
+  <tr><td>RobinBaseRegistrar</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x78443cD8242AfCC56F8779a1D9acB8971cD67ac8">0x78443cD8242AfCC56F8779a1D9acB8971cD67ac8</a></td></tr>
+  <tr><td>RobinWrapper</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0xB1125eb75343054722881F995FE961f93290e1aF">0xB1125eb75343054722881F995FE961f93290e1aF</a></td></tr>
+  <tr><td>RobinPriceOracle</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x6ab29612665a93682a3C6d64f1523f6991723111">0x6ab29612665a93682a3C6d64f1523f6991723111</a></td></tr>
+  <tr><td>RobinReservedList</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x0e558E92D0B4B93C450f4a48EB95Ed3f467ce6de">0x0e558E92D0B4B93C450f4a48EB95Ed3f467ce6de</a></td></tr>
+  <tr><td>RobinMetadata</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x525c188297509941f6f97Cd0ff639cD3011Cb886">0x525c188297509941f6f97Cd0ff639cD3011Cb886</a></td></tr>
+</table></div>
+<p class="small muted">
+  Robin on mainnet (chainId 4663) is not yet deployed. Addresses land in
+  <a href="https://github.com/dotrobinxyz/robin/tree/main/contracts/deployments">contracts/deployments/</a>
+  — the deploy script's own record, so published addresses can never drift
+  from what's on chain.
+</p>
+
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="robin-mark-night.svg" alt="" width="28" height="28" />
+      <span class="wordmark">robin</span>
+    </div>
+    <p class="small">Open-source naming on Robinhood Chain. ENS-standard resolution, on-chain SVG art, locked metadata.</p>
+    <div class="footer-links">
+      <a href="https://dotrobin.xyz">dotrobin.xyz</a>
+      <a href="https://api.dotrobin.xyz">api.dotrobin.xyz</a>
+      <a href="https://github.com/dotrobinxyz/robin">github</a>
+      <a href="https://x.com/dotrobinxyz">@dotrobinxyz</a>
+      <a href="mailto:hello@dotrobin.xyz">hello@dotrobin.xyz</a>
+      <a href="mailto:security@dotrobin.xyz">security@dotrobin.xyz</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
