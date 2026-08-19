@@ -11,7 +11,7 @@ library resolves `.robin` by pointing at the registry and UniversalResolver.
 ## Repository
 
 - `contracts/` — the Robin contracts (fork of ens-contracts) + Foundry tests
-- `packages/sdk/` — `robin-names`, one-line viem/wagmi resolution
+- `packages/sdk/` — [`robin-names`](https://www.npmjs.com/package/robin-names) (`npm i robin-names`), one-line viem/wagmi resolution
 - `indexer/` — Ponder indexer (GraphQL) for names, records, and auctions
 - `apps/web/` — the web app (search, register, manage, renew, subdomains)
 
