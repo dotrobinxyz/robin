@@ -10,6 +10,7 @@ import { ADDRESSES, PREMIUM_DAYS } from "../config";
 import { fetchAuctionCandidates } from "../indexer";
 import { formatCountdown, formatUSDG } from "../lib/format";
 import { BandChip } from "../components/BandChip";
+import { PREMIUM_NAMES, PREMIUM_CONTACT } from "../data/premiumNames";
 
 export function Auctions() {
   const { data: grace } = useReadContract({
@@ -53,6 +54,36 @@ export function Auctions() {
         </p>
       </div>
 
+      {PREMIUM_NAMES.filter((p) => p.live).length > 0 && (
+        <>
+          <h2 className="section-title">Premium names</h2>
+          <p className="muted small" style={{ marginTop: -6 }}>
+            Held or reserved by the Robin treasury for their namesakes —
+            founders, CEOs, KOLs. Yours? Write to{" "}
+            <a href={`mailto:${PREMIUM_CONTACT}`}>{PREMIUM_CONTACT}</a>; pay in
+            USDG or ETH and the name transfers to your wallet.
+          </p>
+          <div className="card">
+            {PREMIUM_NAMES.filter((p) => p.live).map((p) => (
+              <a
+                className="name-row"
+                key={p.label}
+                href={`mailto:${PREMIUM_CONTACT}?subject=${encodeURIComponent(
+                  `${p.label}.robin`,
+                )}`}
+              >
+                <BandChip name={p.label} variant="night" size="sm" />
+                <span className="premium-price">
+                  ${p.priceUSD.toLocaleString("en-US")}
+                </span>
+                <span className="muted small">inquire</span>
+              </a>
+            ))}
+          </div>
+        </>
+      )}
+
+      <h2 className="section-title">Expiry auctions</h2>
       {labels.length === 0 ? (
         <div className="empty">no names in auction right now</div>
       ) : (
