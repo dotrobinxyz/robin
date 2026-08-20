@@ -1,0 +1,20 @@
+// Keyless verification of the mainnet smoke registration.
+import { createPublicClient, http } from "viem";
+import { robinhoodChain, ROBIN_ADDRESSES, robinTokenId, robinNode, robinBaseRegistrarAbi } from "../dist/index.js";
+const A = ROBIN_ADDRESSES[4663];
+const OWNER = "0x18A3675e49ec7F2782aC0A2515451d60A7645301";
+const pub = createPublicClient({ chain: robinhoodChain, transport: http() });
+const fwd = await pub.getEnsAddress({ name: "goldfinch.robin" });
+const rev = await pub.getEnsName({ address: OWNER });
+const txt = await pub.getEnsText({ name: "goldfinch.robin", key: "url" });
+const holder = await pub.readContract({ address: A.baseRegistrar, abi: robinBaseRegistrarAbi, functionName: "ownerOf", args: [robinTokenId("goldfinch")] });
+const uri = await pub.readContract({ address: A.baseRegistrar, abi: robinBaseRegistrarAbi, functionName: "tokenURI", args: [robinTokenId("goldfinch")] });
+const subOwner = await pub.readContract({ address: A.registry, abi: [{name:"owner",type:"function",stateMutability:"view",inputs:[{type:"bytes32"}],outputs:[{type:"address"}]}], functionName: "owner", args: [robinNode("bot1.goldfinch")] });
+console.log("forward:", fwd);
+console.log("reverse:", rev);
+console.log("text url:", txt);
+console.log("721 held by wrapper:", holder === A.wrapper);
+console.log("subname registry owner is wrapper:", subOwner === A.wrapper);
+console.log("tokenURI head:", uri.slice(0, 40));
+const ok = fwd === OWNER && rev === "goldfinch.robin" && txt === "https://dotrobin.xyz" && holder === A.wrapper;
+console.log(ok ? "MAINNET_SMOKE_PASS" : "CHECK_DETAILS");
