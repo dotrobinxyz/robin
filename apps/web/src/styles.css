@@ -160,6 +160,13 @@ a:hover {
 .footer .links a:hover {
   color: var(--green);
 }
+.premium-price {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
 /* launch promo — driven by the oracle's promoEnd, self-expiring */
 .promo-chip {
   display: inline-block;
