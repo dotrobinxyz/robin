@@ -6,14 +6,20 @@
 export type PremiumName = {
   label: string;
   priceUSD: number;
-  /** true once the name is secured (Safe-held or on-chain reserved) — only
+  /** true once the name is secured (sale-held or on-chain reserved) — only
    *  live names render, so the list is never a sniper's shopping list. */
   live: boolean;
+  /** on-chain reserved (not yet registered) — inquire flow instead of buy. */
+  reserved?: boolean;
 };
 
+/** RobinPremiumSale contract; empty until deployed — rows fall back to
+ *  the inquire flow while unset. */
+export const SALE_ADDRESS = "" as `0x${string}` | "";
+
 export const PREMIUM_NAMES: PremiumName[] = [
-  { label: "vlad", priceUSD: 2000, live: true },
-  { label: "vladtenev", priceUSD: 1000, live: true },
+  { label: "vlad", priceUSD: 2000, live: true, reserved: true },
+  { label: "vladtenev", priceUSD: 1000, live: true, reserved: true },
   { label: "vitalik", priceUSD: 2000, live: false },
   { label: "satoshi", priceUSD: 2000, live: false },
   { label: "elon", priceUSD: 2000, live: false },

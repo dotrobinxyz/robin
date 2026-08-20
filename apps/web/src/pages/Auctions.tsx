@@ -11,6 +11,7 @@ import { fetchAuctionCandidates } from "../indexer";
 import { formatCountdown, formatUSDG } from "../lib/format";
 import { BandChip } from "../components/BandChip";
 import { PREMIUM_NAMES, PREMIUM_CONTACT } from "../data/premiumNames";
+import { PremiumBuy } from "../components/PremiumBuy";
 
 export function Auctions() {
   const { data: grace } = useReadContract({
@@ -65,19 +66,24 @@ export function Auctions() {
           </p>
           <div className="card">
             {PREMIUM_NAMES.filter((p) => p.live).map((p) => (
-              <a
-                className="name-row"
-                key={p.label}
-                href={`mailto:${PREMIUM_CONTACT}?subject=${encodeURIComponent(
-                  `${p.label}.robin`,
-                )}`}
-              >
+              <div className="name-row" key={p.label}>
                 <BandChip name={p.label} variant="night" size="sm" />
                 <span className="premium-price">
                   ${p.priceUSD.toLocaleString("en-US")}
                 </span>
-                <span className="muted small">inquire</span>
-              </a>
+                {p.reserved ? (
+                  <a
+                    className="muted small"
+                    href={`mailto:${PREMIUM_CONTACT}?subject=${encodeURIComponent(
+                      `${p.label}.robin`,
+                    )}`}
+                  >
+                    inquire
+                  </a>
+                ) : (
+                  <PremiumBuy label={p.label} />
+                )}
+              </div>
             ))}
           </div>
         </>
