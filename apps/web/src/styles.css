@@ -160,6 +160,39 @@ a:hover {
 .footer .links a:hover {
   color: var(--green);
 }
+/* launch promo — driven by the oracle's promoEnd, self-expiring */
+.promo-chip {
+  display: inline-block;
+  align-self: flex-start;
+  background: var(--green);
+  color: var(--charcoal);
+  border-radius: var(--r-pill);
+  padding: 7px 16px;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  margin-top: 12px;
+}
+.promo-tag {
+  display: inline-block;
+  background: var(--green);
+  color: var(--charcoal);
+  border-radius: var(--r-pill);
+  padding: 3px 12px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+}
+.price-card .promo-tag {
+  margin-top: 6px;
+}
+.price-card .amt .was {
+  color: var(--grey);
+  text-decoration: line-through;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 400;
+  margin-left: 10px;
+}
+
 .footer .socials {
   display: flex;
   gap: 10px;
