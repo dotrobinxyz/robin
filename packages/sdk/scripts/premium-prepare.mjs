@@ -22,11 +22,14 @@ if (!OWNER || OWNER.length !== 42) {
   console.error("set PREMIUM_OWNER to the deployed RobinPremiumSale address");
   process.exit(1);
 }
-const LABELS = [
-  "vitalik", "satoshi", "elon", "brian", "jesse", "hayden", "sergey",
-  "anatoly", "saylor", "balaji", "naval", "stani", "cobie", "ansem",
-  "gcr", "justin",
-];
+// Labels via PREMIUM_LABELS (comma-separated); defaults to the wave-1 set.
+const LABELS = process.env.PREMIUM_LABELS
+  ? process.env.PREMIUM_LABELS.split(",").map((s) => s.trim()).filter(Boolean)
+  : [
+      "vitalik", "satoshi", "elon", "brian", "jesse", "hayden", "sergey",
+      "anatoly", "saylor", "balaji", "naval", "stani", "cobie", "ansem",
+      "gcr", "justin",
+    ];
 
 const A = ROBIN_ADDRESSES[4663];
 const pub = createPublicClient({ chain: robinhoodChain, transport: http() });
