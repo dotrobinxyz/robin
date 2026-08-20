@@ -33,13 +33,14 @@ const CHAINS: Record<string, { id: number; rpc: string | string[] }> = {
   },
   robinhood: {
     id: 4663,
-    // Same laggy-replica behavior as testnet — give ponder fallbacks.
+    // publicnode first: the official endpoint repeatedly times out and even
+    // mined valid txs as reverts on 2026-08-20 — it goes last as a fallback.
     rpc: process.env.RPC_URL
       ? [process.env.RPC_URL]
       : [
-          "https://rpc.mainnet.chain.robinhood.com",
-          "https://robinhood.drpc.org",
           "https://robinhood-rpc.publicnode.com",
+          "https://robinhood.drpc.org",
+          "https://rpc.mainnet.chain.robinhood.com",
         ],
   },
 };
