@@ -160,6 +160,30 @@ a:hover {
 .footer .links a:hover {
   color: var(--green);
 }
+.footer .socials {
+  display: flex;
+  gap: 10px;
+}
+.footer .social-band {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid rgba(241, 234, 223, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--buff);
+  transition: border-color 0.15s, color 0.15s;
+}
+.footer .social-band:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+.footer .social-band svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+}
 
 main {
   flex: 1;
