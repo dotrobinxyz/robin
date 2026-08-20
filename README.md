@@ -15,6 +15,29 @@ library resolves `.robin` by pointing at the registry and UniversalResolver.
 - `indexer/` — Ponder indexer (GraphQL) for names, records, and auctions
 - `apps/web/` — the web app (search, register, manage, renew, subdomains)
 
+## Mainnet — Robinhood Chain (chainId 4663)
+
+Live and Blockscout-verified. Owner: 2-of-3 Safe
+`0xD0d82499Bfbbc5D92d31BDc46d31d1Fd3eA50a71`.
+
+| Contract | Address |
+|---|---|
+| RobinRegistry | `0x29d8cEae06c4F97c784BD016A41eB45c9A2d6aE1` |
+| RobinBaseRegistrar | `0x218CCD54F64cdcB7d0B6e45eA4665846df01Ad5C` |
+| RobinRegistrarController | `0x9080E579fa9776EFe4531004aBe78D8f25480f77` |
+| RobinPriceOracle | `0x38507fc485d269914A2DCCEF4973f9e572473730` |
+| RobinWrapper | `0x2Ad2590817Dde5A070849DdFBB38959153D7B282` |
+| RobinReservedList | `0xE458B7c0f88A746baeaa9b2a687e6F3d8E1Ba3Eb` |
+| RobinMetadata | `0xda05Ecd77E31099Ea24829E135c18928254E17EB` |
+| PublicResolver | `0x859fe65f2d58182C72E6B7Ca54e32c9a16d5bF04` |
+| ReverseRegistrar | `0x489ae7566b8E48C9B6F922DAe7a6c9c552B57C47` |
+| DefaultReverseRegistrar | `0x3C0ae4a25307c66Fb5f558DF592cc4B70E42ffaa` |
+| UniversalResolver | `0x1C336914666256e2c5131FB460C598F2EAB0292B` |
+| GatewayProvider | `0xf1702Bc3441c87f51c01C035BC2aDA49eBF8a011` |
+
+Explorer: https://robinhoodchain.blockscout.com · App: https://dotrobin.xyz ·
+Docs: https://docs.dotrobin.xyz · API: https://api.dotrobin.xyz/graphql
+
 ## Testnet — Robinhood Chain Testnet (chainId 46630)
 
 | Contract | Address |
