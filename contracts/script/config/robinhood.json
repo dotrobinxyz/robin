@@ -1,5 +1,5 @@
 {
-  "_comment": "Robinhood Chain mainnet (chainId 4663). finalOwner MUST be set to the owner multisig before deploy \u2014 the script refuses to run with it unset. USDG address verified against Paxos docs and on-chain decimals()==6; ETH/USD feed is the Chainlink proxy on Robinhood Chain (8 decimals, 24h heartbeat; maxFeedAge 36h). Promo: 50% off 5+ char base prices for 14 days from deploy.",
+  "_comment": "Robinhood Chain mainnet (chainId 4663). finalOwner MUST be set to the owner multisig before deploy \u2014 the script refuses to run with it unset. USDG address verified against Paxos docs and on-chain decimals()==6; ETH/USD feed is the Chainlink proxy on Robinhood Chain (8 decimals, 24h heartbeat; maxFeedAge 36h). Promo: 50% off 5+ char base prices for 7 days from deploy.",
   "usdg": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
   "ethUsdFeed": "0x78F3556b67E17Df817D51Ef5a990cDaF09E8d3A9",
   "mockEthPriceUSD8": 0,
@@ -9,7 +9,7 @@
   "maxCommitmentAge": 86400,
   "premiumStartAttoUSD": 1000000000000000000000,
   "premiumDays": 21,
-  "promoDurationSeconds": 1209600,
+  "promoDurationSeconds": 604800,
   "batchGatewayUrl": "https://ccip-v2.ens.xyz",
   "finalOwner": "0xD0d82499Bfbbc5D92d31BDc46d31d1Fd3eA50a71",
   "isMainnet": true,

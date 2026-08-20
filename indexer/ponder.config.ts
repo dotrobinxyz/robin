@@ -33,7 +33,14 @@ const CHAINS: Record<string, { id: number; rpc: string | string[] }> = {
   },
   robinhood: {
     id: 4663,
-    rpc: process.env.RPC_URL ?? "https://rpc.mainnet.chain.robinhood.com",
+    // Same laggy-replica behavior as testnet — give ponder fallbacks.
+    rpc: process.env.RPC_URL
+      ? [process.env.RPC_URL]
+      : [
+          "https://rpc.mainnet.chain.robinhood.com",
+          "https://robinhood.drpc.org",
+          "https://robinhood-rpc.publicnode.com",
+        ],
   },
 };
 

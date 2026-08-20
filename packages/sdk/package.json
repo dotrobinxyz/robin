@@ -1,6 +1,6 @@
 {
   "name": "robin-names",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Resolve and register .robin names on Robinhood Chain — ENS-standard resolution with a one-line viem config.",
   "license": "MIT",
   "author": "dotrobinxyz",

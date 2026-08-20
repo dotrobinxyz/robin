@@ -171,9 +171,9 @@ footer {
 
 <h2 id="integrate">viem / wagmi — one line.</h2>
 <pre><code><span class="c">import</span> { createPublicClient, http } <span class="c">from</span> <span class="b">"viem"</span>;
-<span class="g">import { robinhoodChainTestnet } from "robin-names"; // ← the one line</span>
+<span class="g">import { robinhoodChain } from "robin-names"; // ← the one line</span>
 
-<span class="c">const</span> client = createPublicClient({ chain: robinhoodChainTestnet, transport: http() });
+<span class="c">const</span> client = createPublicClient({ chain: robinhoodChain, transport: http() });
 
 <span class="c">// reverse: address → name (do this in your UI)</span>
 <span class="c">await</span> client.getEnsName({ address: <span class="b">"0x71C7656EC7ab88b098defB751B7401B5f6d8976F"</span> });
@@ -205,25 +205,25 @@ footer {
 </p>
 <pre><code><span class="c">import</span> { defineChain } <span class="c">from</span> <span class="b">"viem"</span>;
 
-<span class="c">const</span> robinhoodTestnet = defineChain({
-  id: <span class="b">46630</span>,
-  name: <span class="b">"Robinhood Chain Testnet"</span>,
+<span class="c">const</span> robinhood = defineChain({
+  id: <span class="b">4663</span>,
+  name: <span class="b">"Robinhood Chain"</span>,
   nativeCurrency: { name: <span class="b">"Ether"</span>, symbol: <span class="b">"ETH"</span>, decimals: <span class="b">18</span> },
-  rpcUrls: { default: { http: [<span class="b">"https://rpc.testnet.chain.robinhood.com"</span>] } },
+  rpcUrls: { default: { http: [<span class="b">"https://rpc.mainnet.chain.robinhood.com"</span>] } },
   contracts: {
-<span class="g">    ensRegistry: { address: "0x8705DEC51223E119C5C9f03121626d086A8eF753" },</span>
-<span class="g">    ensUniversalResolver: { address: "0x7112730612e4253Ba2e418A86580615A2c3CDB1D" },</span>
+<span class="g">    ensRegistry: { address: "0x29d8cEae06c4F97c784BD016A41eB45c9A2d6aE1" },</span>
+<span class="g">    ensUniversalResolver: { address: "0x1C336914666256e2c5131FB460C598F2EAB0292B" },</span>
     multicall3: { address: <span class="b">"0xcA11bde05977b3631167028862bE2a173976CA11"</span> },
   },
 });</code></pre>
 <p>
   ethers v6:
-  <code>new JsonRpcProvider(rpc, { chainId: 46630, name: "robinhood-testnet", ensAddress: "0x8705…F753" })</code>.
+  <code>new JsonRpcProvider(rpc, { chainId: 4663, name: "robinhood", ensAddress: "0x29d8…6aE1" })</code>.
 </p>
 
 <h3>Solidity — resolve on-chain.</h3>
 <pre><code><span class="c">// Forward-resolve in a contract via the registry (ERC-137):</span>
-ENS registry = ENS(<span class="b">0x8705DEC51223E119C5C9f03121626d086A8eF753</span>);
+ENS registry = ENS(<span class="b">0x29d8cEae06c4F97c784BD016A41eB45c9A2d6aE1</span>);
 address resolver = registry.resolver(node);
 address target = Resolver(resolver).addr(node);</code></pre>
 <p>
@@ -311,9 +311,9 @@ address target = Resolver(resolver).addr(node);</code></pre>
 
 <h3>Verify a counterparty agent.</h3>
 <pre><code><span class="c">import</span> { createPublicClient, http } <span class="c">from</span> <span class="b">"viem"</span>;
-<span class="c">import</span> { robinhoodChainTestnet, namehash } <span class="c">from</span> <span class="b">"robin-names"</span>;
+<span class="c">import</span> { robinhoodChain, namehash } <span class="c">from</span> <span class="b">"robin-names"</span>;
 
-<span class="c">const</span> client = createPublicClient({ chain: robinhoodChainTestnet, transport: http() });
+<span class="c">const</span> client = createPublicClient({ chain: robinhoodChain, transport: http() });
 
 <span class="c">async function</span> verifyAgent(claimedName, senderAddress) {
   <span class="c">const</span> resolved = <span class="c">await</span> client.getEnsAddress({ name: claimedName });
@@ -337,29 +337,32 @@ address target = Resolver(resolver).addr(node);</code></pre>
 
 <h2 id="addresses">Addresses.</h2>
 <p>
-  Robinhood Chain testnet, chainId <code>46630</code> — live now, verified on
-  <a href="https://explorer.testnet.chain.robinhood.com">Blockscout</a>.
-  Free testnet ETH:
-  <a href="https://faucet.testnet.chain.robinhood.com">faucet.testnet.chain.robinhood.com</a>.
+  Robinhood Chain mainnet, chainId <code>4663</code> — live, verified on
+  <a href="https://robinhoodchain.blockscout.com">Blockscout</a>. Owned by a
+  2-of-3 Safe: <code>0xD0d82499Bfbbc5D92d31BDc46d31d1Fd3eA50a71</code>.
 </p>
 <div class="tablewrap"><table>
   <tr><th>contract</th><th>address</th></tr>
-  <tr><td>RobinRegistry</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x8705DEC51223E119C5C9f03121626d086A8eF753">0x8705DEC51223E119C5C9f03121626d086A8eF753</a></td></tr>
-  <tr><td>UniversalResolver</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x7112730612e4253Ba2e418A86580615A2c3CDB1D">0x7112730612e4253Ba2e418A86580615A2c3CDB1D</a></td></tr>
-  <tr><td>PublicResolver</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x293758cf47CE956fbeD160E54259Af2549faa090">0x293758cf47CE956fbeD160E54259Af2549faa090</a></td></tr>
-  <tr><td>ReverseRegistrar</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x818145E450422484c240a7294de5f71e3A39e4F4">0x818145E450422484c240a7294de5f71e3A39e4F4</a></td></tr>
-  <tr><td>RobinRegistrarController</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x042C39d404C58528963E691a6befC905511a3Dcb">0x042C39d404C58528963E691a6befC905511a3Dcb</a></td></tr>
-  <tr><td>RobinBaseRegistrar</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x78443cD8242AfCC56F8779a1D9acB8971cD67ac8">0x78443cD8242AfCC56F8779a1D9acB8971cD67ac8</a></td></tr>
-  <tr><td>RobinWrapper</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0xB1125eb75343054722881F995FE961f93290e1aF">0xB1125eb75343054722881F995FE961f93290e1aF</a></td></tr>
-  <tr><td>RobinPriceOracle</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x6ab29612665a93682a3C6d64f1523f6991723111">0x6ab29612665a93682a3C6d64f1523f6991723111</a></td></tr>
-  <tr><td>RobinReservedList</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x0e558E92D0B4B93C450f4a48EB95Ed3f467ce6de">0x0e558E92D0B4B93C450f4a48EB95Ed3f467ce6de</a></td></tr>
-  <tr><td>RobinMetadata</td><td><a href="https://explorer.testnet.chain.robinhood.com/address/0x525c188297509941f6f97Cd0ff639cD3011Cb886">0x525c188297509941f6f97Cd0ff639cD3011Cb886</a></td></tr>
+  <tr><td>RobinRegistry</td><td><a href="https://robinhoodchain.blockscout.com/address/0x29d8cEae06c4F97c784BD016A41eB45c9A2d6aE1">0x29d8cEae06c4F97c784BD016A41eB45c9A2d6aE1</a></td></tr>
+  <tr><td>UniversalResolver</td><td><a href="https://robinhoodchain.blockscout.com/address/0x1C336914666256e2c5131FB460C598F2EAB0292B">0x1C336914666256e2c5131FB460C598F2EAB0292B</a></td></tr>
+  <tr><td>PublicResolver</td><td><a href="https://robinhoodchain.blockscout.com/address/0x859fe65f2d58182C72E6B7Ca54e32c9a16d5bF04">0x859fe65f2d58182C72E6B7Ca54e32c9a16d5bF04</a></td></tr>
+  <tr><td>ReverseRegistrar</td><td><a href="https://robinhoodchain.blockscout.com/address/0x489ae7566b8E48C9B6F922DAe7a6c9c552B57C47">0x489ae7566b8E48C9B6F922DAe7a6c9c552B57C47</a></td></tr>
+  <tr><td>DefaultReverseRegistrar</td><td><a href="https://robinhoodchain.blockscout.com/address/0x3C0ae4a25307c66Fb5f558DF592cc4B70E42ffaa">0x3C0ae4a25307c66Fb5f558DF592cc4B70E42ffaa</a></td></tr>
+  <tr><td>RobinRegistrarController</td><td><a href="https://robinhoodchain.blockscout.com/address/0x9080E579fa9776EFe4531004aBe78D8f25480f77">0x9080E579fa9776EFe4531004aBe78D8f25480f77</a></td></tr>
+  <tr><td>RobinBaseRegistrar</td><td><a href="https://robinhoodchain.blockscout.com/address/0x218CCD54F64cdcB7d0B6e45eA4665846df01Ad5C">0x218CCD54F64cdcB7d0B6e45eA4665846df01Ad5C</a></td></tr>
+  <tr><td>RobinWrapper</td><td><a href="https://robinhoodchain.blockscout.com/address/0x2Ad2590817Dde5A070849DdFBB38959153D7B282">0x2Ad2590817Dde5A070849DdFBB38959153D7B282</a></td></tr>
+  <tr><td>RobinPriceOracle</td><td><a href="https://robinhoodchain.blockscout.com/address/0x38507fc485d269914A2DCCEF4973f9e572473730">0x38507fc485d269914A2DCCEF4973f9e572473730</a></td></tr>
+  <tr><td>RobinReservedList</td><td><a href="https://robinhoodchain.blockscout.com/address/0xE458B7c0f88A746baeaa9b2a687e6F3d8E1Ba3Eb">0xE458B7c0f88A746baeaa9b2a687e6F3d8E1Ba3Eb</a></td></tr>
+  <tr><td>RobinMetadata</td><td><a href="https://robinhoodchain.blockscout.com/address/0xda05Ecd77E31099Ea24829E135c18928254E17EB">0xda05Ecd77E31099Ea24829E135c18928254E17EB</a></td></tr>
+  <tr><td>GatewayProvider</td><td><a href="https://robinhoodchain.blockscout.com/address/0xf1702Bc3441c87f51c01C035BC2aDA49eBF8a011">0xf1702Bc3441c87f51c01C035BC2aDA49eBF8a011</a></td></tr>
 </table></div>
 <p class="small muted">
-  Robin on mainnet (chainId 4663) is not yet deployed. Addresses land in
+  Testnet (chainId <code>46630</code>) stays live for development —
+  <code>robinhoodChainTestnet</code> in the SDK, addresses in
   <a href="https://github.com/dotrobinxyz/robin/tree/main/contracts/deployments">contracts/deployments/</a>
-  — the deploy script's own record, so published addresses can never drift
-  from what's on chain.
+  (the deploy script's own record, so published addresses can never drift from
+  what's on chain), free ETH at
+  <a href="https://faucet.testnet.chain.robinhood.com">faucet.testnet.chain.robinhood.com</a>.
 </p>
 
 </div>

@@ -81,7 +81,7 @@ verbatim upstream — differential fuzz in
 
 **Launch promo (oracle).** `block.timestamp < promoEnd && strlen >= 5` →
 base price halved. Premiums never discounted. `promoEnd` immutable
-(deploy + 14 days at mainnet).
+(deploy + 7 days at mainnet).
 
 **Smart-wallet refunds (controller).** `transfer` → OZ `Address.sendValue`
 for refunds and `withdraw` (2300-gas stipend bricks Safe/AA wallets — the
