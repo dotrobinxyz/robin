@@ -4,11 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { normalize } from "robin-names";
 import { fetchRecentActivity } from "../indexer";
 import { BandChip, type BandVariant } from "../components/BandChip";
+import { usePromo } from "../hooks/usePromo";
 
 export function Home() {
   const [, navigate] = useLocation();
   const [query, setQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const promo = usePromo();
 
   const { data: activity } = useQuery({
     queryKey: ["activity"],
@@ -63,6 +65,11 @@ export function Home() {
           </button>
         </form>
         {error && <p className="form-error">{error}</p>}
+        {promo.active && (
+          <div className="promo-chip">
+            launch promo — 5+ letter names 50% off until {promo.endsLabel}
+          </div>
+        )}
       </section>
 
       {recent.length > 0 && (
@@ -108,9 +115,19 @@ export function Home() {
         </div>
         <div className="price-card">
           <div className="tier">5+ characters</div>
-          <div className="amt">
-            $5<span className="per">/yr</span>
-          </div>
+          {promo.active ? (
+            <>
+              <div className="amt">
+                $2.50<span className="per">/yr</span>
+                <span className="was">$5</span>
+              </div>
+              <div className="promo-tag">50% off until {promo.endsLabel}</div>
+            </>
+          ) : (
+            <div className="amt">
+              $5<span className="per">/yr</span>
+            </div>
+          )}
           <p>Everyday names. Buff card.</p>
         </div>
       </div>

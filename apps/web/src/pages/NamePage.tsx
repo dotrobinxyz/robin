@@ -17,6 +17,7 @@ import {
 } from "robin-names";
 import { erc20Abi } from "viem";
 import { ADDRESSES, CHAIN, NETWORK } from "../config";
+import { usePromo } from "../hooks/usePromo";
 import {
   clearPending,
   loadPending,
@@ -195,6 +196,7 @@ function RegisterFlow({
   const activeCurrency = pending?.currency ?? currency;
   const quote = activeCurrency === "USDG" ? usdgQuote : ethQuote;
   const total = quote ? quote.base + quote.premium : undefined;
+  const promo = usePromo();
 
   const step: Step = !pending
     ? "configure"
@@ -376,6 +378,11 @@ function RegisterFlow({
         </>
       )}
 
+      {promo.active && [...label].length >= 5 && (
+        <div className="promo-tag" style={{ marginBottom: 8 }}>
+          50% launch promo applied — ends {promo.endsLabel}
+        </div>
+      )}
       <div className="price-line" style={{ marginBottom: 6 }}>
         <span className="amount">
           {total === undefined
