@@ -25,8 +25,8 @@ export const TEAM_SALE_ADDRESS =
   "0xCF61A22d199D63A64917FeF36bB8f254434F95bA" as `0x${string}`;
 
 export const PREMIUM_NAMES: PremiumName[] = [
-  { label: "vlad", priceUSD: 2000, live: true, reserved: true },
-  { label: "vladtenev", priceUSD: 1000, live: true, reserved: true },
+  { label: "vlad", priceUSD: 3000, live: true, reserved: true },
+  { label: "vladtenev", priceUSD: 2000, live: true, reserved: true },
   { label: "baiju", priceUSD: 100, live: true, sale: TEAM_SALE_ADDRESS },
   { label: "johann", priceUSD: 100, live: true, sale: TEAM_SALE_ADDRESS },
   { label: "jason", priceUSD: 100, live: true, sale: TEAM_SALE_ADDRESS },
