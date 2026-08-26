@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "wouter";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { erc20Abi, isAddress, encodeFunctionData, type Address, type Hex } from "viem";
 import {
@@ -159,6 +160,7 @@ export function ManageName({
 
       {isOwner && (
         <>
+          <PayLinkCard label={label} />
           <RecordsCard
             label={label}
             node={node}
@@ -192,6 +194,45 @@ export function ManageName({
         </>
       )}
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+function PayLinkCard({ label }: { label: string }) {
+  const [copied, setCopied] = useState(false);
+  const url = `${window.location.origin}/pay/${label}`;
+
+  return (
+    <div className="card">
+      <div className="row between wrap">
+        <div>
+          <h3 style={{ margin: 0 }}>Payment link</h3>
+          <p className="small faint" style={{ margin: "4px 0 0" }}>
+            Anyone with this link can pay {label}.robin — no address needed.
+          </p>
+        </div>
+        <div className="row" style={{ gap: 10 }}>
+          <button
+            className="btn small"
+            onClick={() => {
+              navigator.clipboard
+                .writeText(url)
+                .then(() => {
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 1600);
+                })
+                .catch(() => {});
+            }}
+          >
+            {copied ? "copied" : "copy"}
+          </button>
+          <Link href={`/pay/${label}`} className="btn small secondary">
+            open
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
 

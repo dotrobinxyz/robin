@@ -9,6 +9,7 @@ import { Home } from "./pages/Home";
 import { NamePage } from "./pages/NamePage";
 import { MyNames } from "./pages/MyNames";
 import { Auctions } from "./pages/Auctions";
+import { PayHome, PayPage } from "./pages/Pay";
 import "./styles.css";
 
 const queryClient = new QueryClient({
@@ -28,6 +29,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route path="/my" component={MyNames} />
             <Route path="/mine" component={MyNames} />
             <Route path="/auctions" component={Auctions} />
+            <Route path="/pay/:name">
+              {(params) => <PayPage name={decodeURIComponent(params.name)} />}
+            </Route>
+            <Route path="/pay" component={PayHome} />
             <Route>
               <div className="empty">Nothing here.</div>
             </Route>

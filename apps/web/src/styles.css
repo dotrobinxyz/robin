@@ -1005,3 +1005,44 @@ code {
   align-items: center;
   gap: 10px;
 }
+
+/* ------------------------------------------------------------- pay pages */
+.pay-headline {
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  margin: 0 0 10px;
+  color: var(--buff);
+}
+.pay-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--green);
+  margin-bottom: 14px;
+}
+.pay-memo {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  color: var(--grey);
+  margin: 0 0 14px;
+}
+.pay-memo span {
+  color: var(--charcoal);
+}
+.pay-warn {
+  color: #b3462c;
+}
+.qr-tile {
+  background: #fff;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 12px;
+  width: 196px;
+  margin-top: 16px;
+}
+.qr-tile svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
