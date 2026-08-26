@@ -43,6 +43,18 @@ export {
   validateLabel,
 } from "./registration.js";
 
+export {
+  DEFAULT_API_URL,
+  verifyName,
+  getTickers,
+  getTicker,
+  type ApiOptions,
+  type VerifyChecks,
+  type VerifyResult,
+  type TickerInfo,
+  type TickerListing,
+} from "./verify.js";
+
 export { normalize, namehash, labelhash } from "viem/ens";
 
 export * from "./generated/abis.js";

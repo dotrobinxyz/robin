@@ -18,10 +18,10 @@ npm i robin-names viem
 
 ```ts
 import { createPublicClient, http } from "viem";
-import { robinhoodChainTestnet } from "robin-names"; // ← the one line
+import { robinhoodChain } from "robin-names"; // ← the one line
 
 const client = createPublicClient({
-  chain: robinhoodChainTestnet,
+  chain: robinhoodChain,
   transport: http(),
 });
 
@@ -41,10 +41,39 @@ With wagmi, pass the chain into your config and use the stock hooks —
 changes. Already have your own chain object? Wrap it:
 `withRobin(myChainConfig)`.
 
-Live today on Robinhood Chain testnet (chainId 46630). Robin on mainnet
-(chainId 4663) is not yet deployed; `robinhoodChain` ships ready for it, and
-addresses always come from the deploy script's own record in
+Live on Robinhood Chain **mainnet** (chainId 4663) — `robinhoodChain` — and
+testnet (46630) — `robinhoodChainTestnet`. Addresses always come from the
+deploy script's own record in
 [`contracts/deployments/`](https://github.com/dotrobinxyz/robin/tree/main/contracts/deployments).
+
+## Verify names & check tickers
+
+Robin also runs an index-backed REST API. The ticker registry maps tickers
+to their **canonical token contracts** — on a chain full of tokenized
+assets, ten contracts will claim the same ticker and one is real:
+
+```ts
+import { getTicker, verifyName, getTickers } from "robin-names";
+
+// the one true USDG on Robinhood Chain (null unless protocol-curated)
+const usdg = await getTicker("usdg");
+// → { symbol: "USDG", kind: "stable", contract: "0x5fc5…d168", official: true }
+
+// verify any name: registered ∧ unexpired ∧ address set
+const v = await verifyName("goldfinch.robin");
+// → { verified: true, checks: {…}, address, records, ticker, … }
+
+// the whole registry, official listings first
+const all = await getTickers();
+```
+
+Only trust a mapping when `official: true` — it means the name is held by
+the protocol treasury Safe, so the record is multisig-curated. Point
+`{ apiUrl }` at your own indexer to avoid trusting ours.
+
+Every name also gets two shareable pages, no setup:
+`dotrobin.xyz/u/name` (profile) and `dotrobin.xyz/pay/name` (payments,
+with `?amt=&cur=&memo=` prefill).
 
 ## Also exported
 
