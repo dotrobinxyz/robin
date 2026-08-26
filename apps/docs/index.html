@@ -156,6 +156,7 @@ footer {
     <nav class="topnav">
       <a href="#integrate">integrate</a>
       <a href="#indexed">indexed data</a>
+      <a href="#pay">pay &amp; profiles</a>
       <a href="#agents">agents</a>
       <a href="#addresses">addresses</a>
     </nav>
@@ -266,6 +267,54 @@ address target = Resolver(resolver).addr(node);</code></pre>
   <a href="https://github.com/dotrobinxyz/robin/blob/main/indexer/ponder.schema.ts">indexer/ponder.schema.ts</a>.
   Self-hosting is one command (<code>ponder start</code>) against any
   Robinhood Chain RPC.
+</p>
+
+<h2 id="pay">Pay links &amp; profiles.</h2>
+<p>
+  Every registered name ships with two shareable pages — no setup, no contract
+  calls, nothing to deploy:
+</p>
+<p>
+  <span class="band">dotrobin.xyz/u/<span class="sfx">name</span></span>
+  <span class="muted small">→ public profile</span>
+  &nbsp;&nbsp;
+  <span class="band">dotrobin.xyz/pay/<span class="sfx">name</span></span>
+  <span class="muted small">→ payment page</span>
+</p>
+<p>
+  The <strong>profile</strong> renders the name's records — avatar, bio, links —
+  plus its live holdings on Robinhood Chain and the other bands the address
+  owns. The <strong>pay page</strong> resolves the name and sends USDG or ETH
+  from the payer's own wallet, straight to the address the name points at.
+  Robin never holds funds; a payment is a plain transfer to the
+  <code>addr</code> record.
+</p>
+<h3>Request links.</h3>
+<p>
+  Pay pages accept query parameters, so a request for a specific amount is
+  just a URL (owners get a QR of it on their own pay page):
+</p>
+<pre><code><span class="b">https://dotrobin.xyz/pay/trader?amt=25&amp;cur=USDG&amp;memo=lunch</span>
+
+amt   <span class="c">prefilled amount</span>
+cur   <span class="c">USDG (default) or ETH</span>
+memo  <span class="c">shown to the payer, display-only — never sent on-chain</span></code></pre>
+<h3>Records the pages read.</h3>
+<p>
+  Set these under <em>Records</em> on your name page at
+  <a href="https://dotrobin.xyz">dotrobin.xyz</a> — standard ENS text records,
+  readable by any ENS tooling:
+</p>
+<pre><code>addr          <span class="c">where payments go (required for /pay)</span>
+avatar        <span class="c">https:// image URL</span>
+description   <span class="c">profile bio</span>
+url           <span class="c">website link</span>
+com.twitter   <span class="c">x handle</span>
+org.telegram  <span class="c">telegram handle</span></code></pre>
+<p class="small muted">
+  Building a dapp on Robinhood Chain? Deep-link any address you've
+  reverse-resolved: <code>href="https://dotrobin.xyz/pay/&#123;name&#125;"</code>
+  turns every username in your UI into a payment button.
 </p>
 
 <h2 id="agents">Name your agents.</h2>
