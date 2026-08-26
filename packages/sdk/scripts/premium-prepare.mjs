@@ -36,11 +36,13 @@ const pub = createPublicClient({ chain: robinhoodChain, transport: http() });
 let total = 0n;
 const items = [];
 for (const label of LABELS) {
-  const avail = await pub.readContract({
-    address: A.controller, abi: robinRegistrarControllerAbi,
-    functionName: "available", args: [label],
-  });
-  if (!avail) { console.log(`SKIP ${label} — no longer available!`); continue; }
+  if (!process.env.SKIP_AVAILABILITY) {
+    const avail = await pub.readContract({
+      address: A.controller, abi: robinRegistrarControllerAbi,
+      functionName: "available", args: [label],
+    });
+    if (!avail) { console.log(`SKIP ${label} — no longer available!`); continue; }
+  }
   const reg = makeRegistration({
     label, owner: OWNER, duration: 31_536_000n, secret: randomSecret(),
   });
