@@ -1046,3 +1046,63 @@ code {
   width: 100%;
   height: auto;
 }
+
+/* --------------------------------------------------------- profile pages */
+.profile-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--green);
+  margin-bottom: 16px;
+}
+.profile-bio {
+  color: var(--buff);
+  opacity: 0.85;
+  max-width: 520px;
+  margin: 14px 0 0;
+}
+.chip-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.holding-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.holding-row:last-of-type {
+  border-bottom: 0;
+}
+.holding-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.holding-sym {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  min-width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+.holding-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.holding-amt {
+  font-size: 0.9rem;
+  white-space: nowrap;
+}

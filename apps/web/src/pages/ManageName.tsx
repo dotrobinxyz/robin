@@ -199,39 +199,63 @@ export function ManageName({
 
 // ---------------------------------------------------------------------------
 
-function PayLinkCard({ label }: { label: string }) {
+function ShareRow({
+  title,
+  hint,
+  path,
+}: {
+  title: string;
+  hint: string;
+  path: string;
+}) {
   const [copied, setCopied] = useState(false);
-  const url = `${window.location.origin}/pay/${label}`;
+  const url = `${window.location.origin}${path}`;
 
   return (
-    <div className="card">
-      <div className="row between wrap">
-        <div>
-          <h3 style={{ margin: 0 }}>Payment link</h3>
-          <p className="small faint" style={{ margin: "4px 0 0" }}>
-            Anyone with this link can pay {label}.robin — no address needed.
-          </p>
-        </div>
-        <div className="row" style={{ gap: 10 }}>
-          <button
-            className="btn small"
-            onClick={() => {
-              navigator.clipboard
-                .writeText(url)
-                .then(() => {
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 1600);
-                })
-                .catch(() => {});
-            }}
-          >
-            {copied ? "copied" : "copy"}
-          </button>
-          <Link href={`/pay/${label}`} className="btn small secondary">
-            open
-          </Link>
-        </div>
+    <div className="row between wrap" style={{ gap: 10 }}>
+      <div>
+        <h3 style={{ margin: 0 }}>{title}</h3>
+        <p className="small faint" style={{ margin: "4px 0 0" }}>
+          {hint}
+        </p>
       </div>
+      <div className="row" style={{ gap: 10 }}>
+        <button
+          className="btn small"
+          onClick={() => {
+            navigator.clipboard
+              .writeText(url)
+              .then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1600);
+              })
+              .catch(() => {});
+          }}
+        >
+          {copied ? "copied" : "copy"}
+        </button>
+        <Link href={path} className="btn small secondary">
+          open
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function PayLinkCard({ label }: { label: string }) {
+  return (
+    <div className="card">
+      <ShareRow
+        title="Public profile"
+        hint={`Your page — bio, links, holdings, bands. dotrobin.xyz/u/${label}`}
+        path={`/u/${label}`}
+      />
+      <hr className="divider" />
+      <ShareRow
+        title="Payment link"
+        hint={`Anyone with this link can pay ${label}.robin — no address needed.`}
+        path={`/pay/${label}`}
+      />
     </div>
   );
 }

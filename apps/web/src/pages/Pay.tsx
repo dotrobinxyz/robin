@@ -14,29 +14,17 @@ import {
   type Address,
   type Hex,
 } from "viem";
-import { normalize, robinRegistrarControllerAbi } from "robin-names";
+import { robinRegistrarControllerAbi } from "robin-names";
 import { renderSVG } from "uqr";
 import { ADDRESSES, CHAIN, EXPLORER } from "../config";
 import { formatEth, formatUSDG, shortAddress } from "../lib/format";
+import { toFullName } from "../lib/names";
 import { useTx } from "../lib/useTx";
 import { BandChip } from "../components/BandChip";
 
 type Currency = "USDG" | "ETH";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
-
-/** `dallas`, `dallas.robin`, `bot1.goldfinch.robin` → normalized full name. */
-function toFullName(input: string): string | null {
-  const trimmed = input.trim().toLowerCase();
-  if (!trimmed) return null;
-  try {
-    return normalize(
-      trimmed.endsWith(".robin") ? trimmed : `${trimmed}.robin`,
-    );
-  } catch {
-    return null;
-  }
-}
 
 function parseAmount(value: string, currency: Currency): bigint | null {
   const t = value.trim();
@@ -179,6 +167,11 @@ export function PayPage({ name }: { name: string }) {
               ) : (
                 shortAddress(resolved)
               )}
+            </span>
+            <span className="tag">
+              <Link className="chip-link" href={`/u/${label}`}>
+                profile
+              </Link>
             </span>
           </div>
         )}
