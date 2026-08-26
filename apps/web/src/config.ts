@@ -76,6 +76,14 @@ export const EXPLORER = CHAIN.blockExplorers?.default.url;
 export const INDEXER_URL =
   import.meta.env.VITE_INDEXER_URL ?? "http://localhost:42069";
 
+/**
+ * REST endpoints (/verify, /tickers). Same host as the indexer — except in
+ * the same-origin production build (empty INDEXER_URL), where /tickers would
+ * collide with the SPA route of the same name, so we call the api domain.
+ */
+export const API_URL =
+  INDEXER_URL === "" ? "https://api.dotrobin.xyz" : INDEXER_URL;
+
 /** Premium auction length per network (oracle constructor parameter). */
 export const PREMIUM_DAYS = NETWORK === "robinhood-testnet" ? 2 : 21;
 

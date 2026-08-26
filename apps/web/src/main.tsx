@@ -11,6 +11,7 @@ import { MyNames } from "./pages/MyNames";
 import { Auctions } from "./pages/Auctions";
 import { PayHome, PayPage } from "./pages/Pay";
 import { ProfilePage } from "./pages/Profile";
+import { Tickers } from "./pages/Tickers";
 import "./styles.css";
 
 const queryClient = new QueryClient({
@@ -39,6 +40,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                 <ProfilePage name={decodeURIComponent(params.name)} />
               )}
             </Route>
+            <Route path="/tickers" component={Tickers} />
             <Route>
               <div className="empty">Nothing here.</div>
             </Route>

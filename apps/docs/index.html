@@ -157,6 +157,7 @@ footer {
       <a href="#integrate">integrate</a>
       <a href="#indexed">indexed data</a>
       <a href="#pay">pay &amp; profiles</a>
+      <a href="#tickers">tickers</a>
       <a href="#agents">agents</a>
       <a href="#addresses">addresses</a>
     </nav>
@@ -315,6 +316,48 @@ org.telegram  <span class="c">telegram handle</span></code></pre>
   Building a dapp on Robinhood Chain? Deep-link any address you've
   reverse-resolved: <code>href="https://dotrobin.xyz/pay/&#123;name&#125;"</code>
   turns every username in your UI into a payment button.
+</p>
+
+<h2 id="tickers">The ticker registry.</h2>
+<p>
+  Tokenized assets bring a problem chains haven't had to solve at retail
+  scale: <strong>ten contracts will call themselves the same ticker, and one
+  is real</strong>. Robin's ticker registry maps a ticker to its canonical
+  token contract, on-chain, as a name record anyone can resolve:
+</p>
+<p><span class="band night">usdg<span class="sfx">.robin</span></span>
+   <span class="muted small">→ <code>ticker.contract</code> → the canonical USDG token</span></p>
+<pre><code>curl -s <span class="b">https://api.dotrobin.xyz/verify/usdg.robin</span>
+
+{
+  <span class="b">"name"</span>: <span class="b">"usdg.robin"</span>,
+  <span class="b">"verified"</span>: <span class="g">true</span>,
+  <span class="b">"ticker"</span>: {
+    <span class="b">"symbol"</span>: <span class="b">"USDG"</span>,
+    <span class="b">"kind"</span>: <span class="b">"stable"</span>,
+    <span class="b">"contract"</span>: <span class="b">"0x5fc5…d168"</span>,
+    <span class="g">"official": true</span>
+  }
+}</code></pre>
+<h3>Trust model — check <code>official</code>, not the label.</h3>
+<p>
+  Anyone can write a <code>ticker.contract</code> record on a name they own.
+  A listing is <strong>official</strong> only when the name is held by the
+  protocol treasury (the deployment's <code>finalOwner</code> Safe) — those
+  records are curated by Robin and changeable only by a multisig ceremony.
+  Wallets and bots MUST check <code>official: true</code> before treating a
+  mapping as canonical. <code>GET /tickers</code> returns the full registry,
+  official listings first; the human view lives at
+  <a href="https://dotrobin.xyz/tickers">dotrobin.xyz/tickers</a>.
+</p>
+<h3>Record keys.</h3>
+<pre><code>ticker.contract   <span class="c">token contract address — the mapping itself (required)</span>
+ticker.symbol     <span class="c">display symbol (defaults to the label, uppercased)</span>
+ticker.kind       <span class="c">equity | private | stable | crypto | index (optional)</span></code></pre>
+<p class="small muted">
+  Ticker labels (tsla, aapl, hood, …) are on the reserved list — never sold,
+  released only into treasury custody. To propose a listing or dispute one:
+  <a href="mailto:security@dotrobin.xyz">security@dotrobin.xyz</a>.
 </p>
 
 <h2 id="agents">Name your agents.</h2>

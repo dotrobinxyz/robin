@@ -1106,3 +1106,16 @@ code {
   font-size: 0.9rem;
   white-space: nowrap;
 }
+
+/* -------------------------------------------------------------- tickers */
+.ticker-curl {
+  background: var(--night);
+  color: var(--buff);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 0;
+  overflow-x: auto;
+  white-space: pre;
+}
