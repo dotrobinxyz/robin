@@ -27,9 +27,21 @@ function Connect() {
   const { data: primary } = useEnsName({ address, query: { enabled: Boolean(address) } });
 
   if (isConnected && address) {
+    const label = primary?.replace(/\.robin$/, "");
     return (
-      <button className="btn small secondary" onClick={() => disconnect()}>
-        {primary ?? shortAddress(address)}
+      <button
+        style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
+        onClick={() => disconnect()}
+        title="disconnect"
+      >
+        {label ? (
+          <span className="band sm">
+            {label}
+            <span className="tld">.robin</span>
+          </span>
+        ) : (
+          <span className="band sm">{shortAddress(address)}</span>
+        )}
       </button>
     );
   }
@@ -54,6 +66,7 @@ function App() {
             <img src="/nest/icon-192.png" alt="" />
             <span className="wordmark">nest</span>
           </span>
+          <div className="spacer" />
           <Connect />
         </header>
         {tab === "nest" && <NestTab />}

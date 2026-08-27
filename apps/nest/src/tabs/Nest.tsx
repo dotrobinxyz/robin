@@ -119,14 +119,14 @@ function Tokens({ address }: { address: `0x${string}` }) {
   if (!data) return null;
   return (
     <div className="card">
-      <h3 style={{ margin: "0 0 8px", fontFamily: "var(--display)" }}>Tokens</h3>
+      <h3 className="card-title" style={{ fontSize: 15 }}>Tokens</h3>
       <div className="holding-row">
-        <span className="holding-sym">ETH</span>
-        <span className="holding-name">Ether</span>
-        <span className="holding-amt">
-          {formatEth(data.eth)}
+        <span className="holding-sym">Ξ</span>
+        <span className="holding-name">ETH</span>
+        <span className="holding-right">
+          <div className="amt">{formatEth(data.eth).replace(" ETH", "")}</div>
           {data.ethUsd != null && data.ethUsd >= 0.01 && (
-            <span className="muted"> · ${data.ethUsd.toFixed(2)}</span>
+            <div className="usd">${data.ethUsd.toFixed(2)}</div>
           )}
         </span>
       </div>
@@ -135,13 +135,22 @@ function Tokens({ address }: { address: `0x${string}` }) {
           {t.icon ? (
             <img className="holding-icon" src={t.icon} alt="" />
           ) : (
-            <span className="holding-sym">{t.symbol.slice(0, 4)}</span>
+            <span
+              className="holding-sym"
+              style={
+                t.symbol === "ROBIN" ? { color: "var(--green)" } : undefined
+              }
+            >
+              {t.symbol === "USDG" ? "$" : t.symbol.slice(0, 1).toLowerCase()}
+            </span>
           )}
-          <span className="holding-name">{t.name}</span>
-          <span className="holding-amt">
-            {t.amount.toLocaleString("en-US", { maximumFractionDigits: 4 })}
+          <span className="holding-name">{t.symbol}</span>
+          <span className="holding-right">
+            <div className="amt">
+              {t.amount.toLocaleString("en-US", { maximumFractionDigits: 4 })}
+            </div>
             {t.usd != null && t.usd >= 0.01 && (
-              <span className="muted"> · ${t.usd.toFixed(2)}</span>
+              <div className="usd">${t.usd.toFixed(2)}</div>
             )}
           </span>
         </div>
@@ -172,6 +181,7 @@ export function NestTab() {
 
   return (
     <>
+      <div className="h1">Your nest.</div>
       {named.length === 0 && (
         <div className="card">
           <p className="muted" style={{ margin: 0 }}>
@@ -188,7 +198,7 @@ export function NestTab() {
       ))}
       {(data?.subnames ?? []).length > 0 && (
         <div className="card">
-          <h3 style={{ margin: "0 0 8px", fontFamily: "var(--display)" }}>
+          <h3 className="card-title" style={{ fontSize: 15 }}>
             Subnames
           </h3>
           <div className="row wrap" style={{ gap: 8 }}>

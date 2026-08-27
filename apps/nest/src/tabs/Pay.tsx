@@ -140,8 +140,8 @@ export function PayTab() {
   return (
     <>
       <div className="card">
-        <h3 style={{ margin: "0 0 10px", fontFamily: "var(--display)" }}>
-          Send by name
+        <h3 className="card-title" style={{ marginBottom: 12 }}>
+          Send by name.
         </h3>
         {sent && <div className="toast">{sent}</div>}
         <div className="field">
@@ -173,23 +173,23 @@ export function PayTab() {
         </div>
         <div className="field">
           <label>token</label>
-          <select
-            className="input mono"
-            value={tokenIdx}
-            onChange={(e) => setTokenIdx(Number(e.target.value))}
-          >
+          <div className="chips">
             {options.map((t, i) => (
-              <option key={t.symbol + i} value={i}>
-                {t.symbol} —{" "}
-                {t.address === null
-                  ? formatEth(t.balance)
-                  : (Number(t.balance) / 10 ** t.decimals).toLocaleString(
-                      "en-US",
-                      { maximumFractionDigits: 4 },
-                    )}
-              </option>
+              <button
+                key={t.symbol + i}
+                className={`chip${i === tokenIdx ? " on" : ""}`}
+                onClick={() => setTokenIdx(i)}
+              >
+                {t.symbol}
+              </button>
             ))}
-          </select>
+          </div>
+          <p className="small muted mono" style={{ margin: "8px 0 0" }}>
+            balance{" "}
+            {token.address === null
+              ? formatEth(token.balance)
+              : `${(Number(token.balance) / 10 ** token.decimals).toLocaleString("en-US", { maximumFractionDigits: 4 })} ${token.symbol}`}
+          </p>
         </div>
         <div className="field">
           <label>amount</label>
@@ -226,9 +226,7 @@ export function PayTab() {
       </div>
 
       <div className="card">
-        <h3 style={{ margin: "0 0 6px", fontFamily: "var(--display)" }}>
-          Receive
-        </h3>
+        <h3 className="card-title">Receive.</h3>
         {myPayUrl && qr ? (
           <>
             <p className="small muted" style={{ margin: 0 }}>
