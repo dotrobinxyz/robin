@@ -331,7 +331,15 @@ function BatchIssue({
   const dupes = rows.filter((r) => existing.has(r.label));
 
   async function issue() {
-    if (!walletClient || !publicClient || rows.length === 0) return;
+    if (rows.length === 0) return;
+    if (!walletClient || !publicClient) {
+      // A backgrounded in-app browser can drop the wallet session while the
+      // page still shows as connected — say so instead of silently no-oping.
+      setError(
+        "wallet connection isn't ready — disconnect and reconnect your wallet (make sure it's on Robinhood Chain), then try again.",
+      );
+      return;
+    }
     setError(null);
     try {
       // One transaction per subname: the wrapper mints to the operator with
@@ -626,8 +634,9 @@ function BulkCard({
   count: number;
   onDone: () => void;
 }) {
-  const { run, busy, error, walletClient } = useTx();
+  const { run, busy, error, setError, walletClient } = useTx();
   const { address } = useAccount();
+  const [agentAddr, setAgentAddr] = useState("");
   const [caps, setCaps] = useState("");
   const [model, setModel] = useState("");
   const [url, setUrl] = useState("");
@@ -638,12 +647,31 @@ function BulkCard({
     ["url", url],
   ];
   const active = fields.filter(([, v]) => v.trim() !== "");
+  const hasAddr = agentAddr.trim() !== "";
 
   async function apply() {
-    if (!walletClient || !address || nodes.length === 0 || active.length === 0)
+    if (nodes.length === 0 || (active.length === 0 && !hasAddr)) return;
+    if (!walletClient || !address) {
+      setError(
+        "wallet connection isn't ready — disconnect and reconnect your wallet, then try again.",
+      );
       return;
+    }
+    if (hasAddr && !isAddress(agentAddr.trim())) {
+      setError("agent account must be a valid 0x… address.");
+      return;
+    }
     const calls: Hex[] = [];
     for (const node of nodes) {
+      if (hasAddr) {
+        calls.push(
+          encodeFunctionData({
+            abi: publicResolverAbi,
+            functionName: "setAddr",
+            args: [node as Hex, agentAddr.trim() as Address],
+          }),
+        );
+      }
       for (const [key, value] of active) {
         calls.push(
           encodeFunctionData({
@@ -668,6 +696,7 @@ function BulkCard({
           }),
       ],
       () => {
+        setAgentAddr("");
         setCaps("");
         setModel("");
         setUrl("");
@@ -686,6 +715,16 @@ function BulkCard({
         in a single transaction. Filled fields overwrite; empty fields are
         left untouched.
       </p>
+      <div className="field">
+        <label>agent account — addr (same for every selected)</label>
+        <input
+          className="input mono"
+          placeholder="0x… (what the agent name pays to / verifies as)"
+          value={agentAddr}
+          onChange={(e) => setAgentAddr(e.target.value)}
+          autoCapitalize="none"
+        />
+      </div>
       <div className="field">
         <label>agent.capabilities</label>
         <input
@@ -719,7 +758,9 @@ function BulkCard({
       <button
         className="btn block"
         onClick={apply}
-        disabled={busy !== null || count === 0 || active.length === 0}
+        disabled={
+          busy !== null || count === 0 || (active.length === 0 && !hasAddr)
+        }
       >
         {busy ? <span className="progress-ring" /> : null}
         apply to {count} agent{count === 1 ? "" : "s"} — one transaction
