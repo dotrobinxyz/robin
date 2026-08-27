@@ -63,7 +63,7 @@ function App() {
       <div className="shell">
         <header className="topbar">
           <span className="brand">
-            <img src="/nest/icon-192.png" alt="" />
+            <img src="/nest/mark.svg" alt="" />
             <span className="wordmark">nest</span>
           </span>
           <div className="spacer" />

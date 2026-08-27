@@ -38,7 +38,7 @@ a { color: var(--green); text-decoration: none; }
 }
 .topbar .spacer { flex: 1; }
 .brand { display: flex; align-items: center; gap: 10px; }
-.brand img { width: 30px; height: 30px; border-radius: 50%; display: block; }
+.brand img { width: 34px; height: 34px; display: block; }
 .wordmark {
   font-family: var(--display);
   font-weight: 700;
