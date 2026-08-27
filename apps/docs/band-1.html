@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BAND-1 — the agent banding standard · robin</title>
+<meta name="description" content="BAND-1: revocable, verifiable on-chain identity for trading agents on Robinhood Chain, built on ENS-standard .robin names." />
+<style>
+:root {
+  --green: #ccff00; --charcoal: #2a2622; --buff: #f1eadf;
+  --grey: #8c8578; --night: #1a1714;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --ui: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--buff); color: var(--charcoal); font-family: var(--ui); font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+.shell { max-width: 760px; margin: 0 auto; padding: 28px 20px 80px; }
+a { color: var(--charcoal); }
+h1 { font-family: var(--display); font-size: clamp(1.9rem, 5vw, 2.6rem); margin: 18px 0 6px; }
+h2 { font-family: var(--display); font-size: 1.45rem; margin: 42px 0 10px; }
+h3 { font-size: 1.05rem; margin: 26px 0 8px; }
+.lede { color: var(--grey); font-size: 1.05rem; }
+code { font-family: var(--mono); font-size: 0.86em; background: rgba(140,133,120,0.14); border-radius: 6px; padding: 1px 6px; }
+pre { background: var(--night); color: var(--buff); font-family: var(--mono); font-size: 0.82rem; line-height: 1.6; border-radius: 14px; padding: 16px 18px; overflow-x: auto; }
+pre code { background: none; padding: 0; color: inherit; }
+pre .g { color: var(--green); }
+pre .c { color: var(--grey); }
+table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid rgba(140,133,120,0.35); vertical-align: top; }
+th { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey); }
+td code { white-space: nowrap; }
+.chip { display: inline-block; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.05em; border-radius: 999px; padding: 2px 10px; }
+.must { background: var(--green); color: var(--charcoal); }
+.should { border: 1.5px solid var(--charcoal); }
+.may { border: 1.5px solid var(--grey); color: var(--grey); }
+.band { display: inline-flex; font-family: var(--mono); border: 2px solid var(--charcoal); border-radius: 999px; padding: 5px 14px; font-size: 0.9rem; }
+.band.night { border-color: transparent; background: var(--night); color: var(--buff); }
+.band.night .sfx { color: var(--green); }
+.meta { font-family: var(--mono); font-size: 0.8rem; color: var(--grey); }
+.topbar { display: flex; align-items: center; gap: 10px; }
+.wordmark { font-family: var(--mono); font-size: 14px; border: 2px solid var(--charcoal); border-radius: 999px; padding: 3px 13px; }
+.tag { font-family: var(--mono); font-size: 0.7rem; background: var(--green); border-radius: 999px; padding: 3px 10px; }
+ol li, ul li { margin: 6px 0; }
+.muted { color: var(--grey); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<div class="topbar">
+  <a href="https://dotrobin.xyz" style="text-decoration:none"><span class="wordmark">robin</span></a>
+  <span class="tag">BAND-1</span>
+  <span class="meta"><a href="index.html">docs</a> · <a href="https://dotrobin.xyz/flock">flock console</a></span>
+</div>
+
+<h1>BAND-1 — the agent banding standard.</h1>
+<p class="lede">
+  Revocable, verifiable on-chain identity for software agents on Robinhood
+  Chain, built on ENS-standard <code>.robin</code> names. Know your agent.
+</p>
+
+<table>
+  <tr><th>status</th><td>Live</td></tr>
+  <tr><th>created</th><td>2026-08-27</td></tr>
+  <tr><th>requires</th><td>ERC-137 (registry) · ENSIP-5 (text records) · ENSIP-15 (normalization)</td></tr>
+  <tr><th>registry</th><td>Robin on Robinhood Chain (4663) — addresses at <a href="index.html#addresses">docs</a></td></tr>
+</table>
+
+<h2 id="model">1. The model.</h2>
+<p>
+  Agents are transacting on Robinhood Chain — trading, holding funds, talking
+  to venues. A wallet address says nothing about what an agent is or who
+  answers for it. BAND-1 gives every agent an identity that can be
+  <strong>verified by anyone</strong> and <strong>revoked by its
+  operator</strong>:
+</p>
+<p>
+  <span class="band night">sniper1.pons<span class="sfx">.robin</span></span>
+  &nbsp;<span class="muted">→ one subname per agent, under the operator's name</span>
+</p>
+<ul>
+  <li><strong>The operator</strong> holds a wrapped second-level name
+    (<code>pons.robin</code>) and mints one subname per agent.</li>
+  <li><strong>Subnames are minted to the operator, not the agent.</strong>
+    The agent's account goes in the <code>addr</code> record. This is the
+    load-bearing choice: the operator keeps record authority and can revoke —
+    reclaim the subname and clear its records — in one transaction. An
+    identity that cannot be taken away is a liability, not a credential.</li>
+  <li><strong>Names expire.</strong> Renewal is the operator's heartbeat; an
+    abandoned fleet stops verifying by itself.</li>
+</ul>
+
+<h2 id="records">2. Records.</h2>
+<table>
+  <tr><th>record</th><th>level</th><th>meaning</th></tr>
+  <tr><td><code>addr</code> (coinType 60)</td><td><span class="chip must">MUST</span></td>
+      <td>the agent's account. Verification fails without it; clearing it is revocation.</td></tr>
+  <tr><td><code>agent.capabilities</code></td><td><span class="chip must">MUST</span></td>
+      <td>comma-separated capability card (<code>swap,quote,settlement</code>). Publishing any <code>agent.*</code> record opts the name into the public directory.</td></tr>
+  <tr><td><code>url</code></td><td><span class="chip should">SHOULD</span></td>
+      <td>operator or agent endpoint — where a human reads more.</td></tr>
+  <tr><td><code>description</code></td><td><span class="chip should">SHOULD</span></td>
+      <td>one line on what the agent does.</td></tr>
+  <tr><td><code>agent.model</code></td><td><span class="chip may">MAY</span></td>
+      <td>the model behind the agent, if any.</td></tr>
+  <tr><td><code>agent.operator</code></td><td><span class="chip may">MAY</span></td>
+      <td>free-text operator identity, when the parent name isn't enough.</td></tr>
+  <tr><td><code>avatar</code></td><td><span class="chip may">MAY</span></td>
+      <td>https image URL.</td></tr>
+</table>
+
+<h2 id="verify">3. Verification.</h2>
+<p>A verifier — a venue, a launchpad's bot gate, a counterparty agent — checks:</p>
+<ol>
+  <li>Normalize the name (ENSIP-15) and compute its namehash.</li>
+  <li>The node is <strong>registered</strong> (registry entry, or provable records).</li>
+  <li>The root second-level name is <strong>unexpired</strong>.</li>
+  <li>An <code>addr</code> record is <strong>set</strong> — and matches the account you're facing.</li>
+  <li><em>Optional, strongest signal:</em> the address's reverse record points back at the name (<code>primaryMatch</code>).</li>
+  <li>Walk the <strong>operator chain</strong> — every ancestor up to the 2LD. This is who can revoke the agent; trust the chain, not the label.</li>
+  <li>Read the capability card and apply your own policy.</li>
+</ol>
+<p>All of it is one call against the public index (or your own — <code>ponder start</code> self-hosts it):</p>
+<pre><code>curl -s <span class="g">https://api.dotrobin.xyz/verify/sniper1.pons.robin</span>
+
+{
+  "verified": <span class="g">true</span>,
+  "checks": { "registered": true, "rootActive": true,
+              "addressSet": true, "primaryMatch": false },
+  "address": "0x…",            <span class="c">// the agent's account</span>
+  "operator": { "name": "pons.robin", "owner": "0x…" },
+  "operatorChain": [ … ],       <span class="c">// who can revoke, in order</span>
+  "agent": { "capabilities": ["swap","quote"], "model": "…", … }
+}</code></pre>
+<p>
+  The directory of every banded agent:
+  <code>GET https://api.dotrobin.xyz/agents</code>
+  (filter with <code>?operator=pons.robin</code>).
+</p>
+
+<h2 id="freshness">4. Freshness.</h2>
+<p>
+  Verification is a statement about <em>now</em>: names expire and agents get
+  revoked. Never cache a verdict longer than <strong>60 seconds</strong> for
+  anything that moves value. The API stamps every response with
+  <code>asOf</code>.
+</p>
+
+<h2 id="security">5. Security considerations.</h2>
+<ul>
+  <li><strong>Records are self-attested.</strong> A capability card is a
+    claim by the operator, not an audit. What BAND-1 proves is
+    <em>accountability</em> — which operator answers for this agent — not
+    competence.</li>
+  <li><strong>Trust the chain, not the label.</strong>
+    <code>sniper1.pons.robin</code> means only that the holder of
+    <code>pons.robin</code> vouches for it. Decide which operators you trust;
+    the label text proves nothing.</li>
+  <li><strong>For value transfer, require <code>primaryMatch</code>.</strong>
+    The reverse-record round trip binds account and name in both
+    directions.</li>
+  <li><strong>Expiry is a feature.</strong> A verifier rejecting expired
+    roots is the system working as designed.</li>
+  <li><strong>Emancipated subnames</strong> (fuse
+    <code>PARENT_CANNOT_CONTROL</code>) cannot be revoked by the operator —
+    verifiers may treat them as self-sovereign agents and apply stricter
+    policy.</li>
+</ul>
+
+<h2 id="versioning">6. Versioning.</h2>
+<p>
+  BAND-1 is additive: new <code>agent.*</code> keys may be defined without
+  breaking verifiers. Breaking changes get a new number. Propose changes:
+  <a href="https://github.com/dotrobinxyz/robin">github.com/dotrobinxyz/robin</a>
+  or <a href="mailto:hello@dotrobin.xyz">hello@dotrobin.xyz</a>.
+</p>
+
+<p class="meta" style="margin-top:48px">
+  robin — names on Robinhood Chain · <a href="https://dotrobin.xyz">dotrobin.xyz</a> ·
+  <a href="https://dotrobin.xyz/flock">flock</a> ·
+  <a href="https://api.dotrobin.xyz/agents">api</a>
+</p>
+
+</div>
+</body>
+</html>

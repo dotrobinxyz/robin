@@ -410,7 +410,22 @@ ticker.kind       <span class="c">equity | private | stable | crypto | index (op
   </li>
 </ol>
 
-<h3>Verify a counterparty agent.</h3>
+<p style="margin-top:14px">
+  <strong>Or skip the plumbing — Flock does all of this.</strong> The console
+  at <a href="https://dotrobin.xyz/flock">dotrobin.xyz/flock</a> bands agents
+  in batch (subnames minted to <em>you</em>, so they stay revocable), writes
+  capability cards in one transaction, and revokes a compromised agent in one
+  click. The full identity model — records, verification algorithm, security
+  considerations — is specified in
+  <a href="band-1.html"><strong>BAND-1, the agent banding standard</strong></a>.
+</p>
+<pre><code><span class="c"># one-call verification — verdict, operator chain, capability card:</span>
+curl -s <span class="b">https://api.dotrobin.xyz/verify/bot1.goldfinch.robin</span>
+
+<span class="c"># the directory of every banded agent (?operator= filters a fleet):</span>
+curl -s <span class="b">https://api.dotrobin.xyz/agents</span></code></pre>
+
+<h3>Verify a counterparty agent on-chain.</h3>
 <pre><code><span class="c">import</span> { createPublicClient, http } <span class="c">from</span> <span class="b">"viem"</span>;
 <span class="c">import</span> { robinhoodChain, namehash } <span class="c">from</span> <span class="b">"robin-names"</span>;
 
