@@ -153,13 +153,12 @@ export function ManageName({
         </div>
       </div>
 
-      {!isOwner && (
-        <ShopBuyCard
-          label={label}
-          node={node}
-          ownerAddress={beneficialOwner}
-        />
-      )}
+      <ShopBuyCard
+        label={label}
+        node={node}
+        ownerAddress={beneficialOwner}
+        isOwner={isOwner}
+      />
 
       <RenewCard
         label={label}

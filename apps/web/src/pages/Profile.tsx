@@ -5,7 +5,9 @@ import { useAccount, useEnsAddress, useEnsText, useReadContract } from "wagmi";
 import { type Address } from "viem";
 import { robinRegistrarControllerAbi } from "robin-names";
 import { ADDRESSES, EXPLORER } from "../config";
-import { formatEth, shortAddress } from "../lib/format";
+import { SHOP_ADDRESS, shopAbi } from "../lib/shop";
+import { formatEth, formatUSDG, shortAddress } from "../lib/format";
+import { namehash } from "robin-names";
 import { toFullName } from "../lib/names";
 import { fetchNamesByOwner } from "../indexer";
 import { BandChip } from "../components/BandChip";
@@ -200,11 +202,55 @@ export function ProfilePage({ name }: { name: string }) {
         </div>
       ) : (
         <>
+          <ShopBanner label={label} ownerKnown={Boolean(resolved)} />
           <HoldingsCard address={resolved} />
           <BandsCard address={resolved} self={full} />
         </>
       )}
     </>
+  );
+}
+
+/** When this name runs a subname shop, invite visitors in. */
+function ShopBanner({
+  label,
+  ownerKnown,
+}: {
+  label: string;
+  ownerKnown: boolean;
+}) {
+  const node = namehash(`${label}.robin`) as `0x${string}`;
+  const { data: listing } = useReadContract({
+    address: SHOP_ADDRESS,
+    abi: shopAbi,
+    functionName: "listings",
+    args: [node],
+    query: { enabled: Boolean(SHOP_ADDRESS) && ownerKnown },
+  });
+  const seller = listing?.[0];
+  const priceUSDG = listing?.[1] ?? 0n;
+  const priceETH = listing?.[2] ?? 0n;
+  if (!seller || seller === ZERO) return null;
+  const priceLine =
+    priceUSDG > 0n
+      ? formatUSDG(priceUSDG)
+      : priceETH > 0n
+        ? formatEth(priceETH)
+        : "";
+  return (
+    <div className="card">
+      <div className="row between wrap">
+        <div>
+          <h3 style={{ margin: 0 }}>Shop open 🛍</h3>
+          <p className="small faint" style={{ margin: "4px 0 0" }}>
+            Get yourname.{label}.robin — {priceLine} each, yours forever.
+          </p>
+        </div>
+        <Link href={`/name/${label}`} className="btn small">
+          get yours
+        </Link>
+      </div>
+    </div>
   );
 }
 

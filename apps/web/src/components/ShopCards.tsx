@@ -16,10 +16,12 @@ export function ShopBuyCard({
   label,
   node,
   ownerAddress,
+  isOwner = false,
 }: {
   label: string;
   node: Hex;
   ownerAddress: Address | undefined;
+  isOwner?: boolean;
 }) {
   const { address, isConnected } = useAccount();
   const { run, busy, error, setError, walletClient, publicClient } = useTx();
@@ -117,6 +119,11 @@ export function ShopBuyCard({
   return (
     <div className="card">
       <h3 style={{ margin: "0 0 4px" }}>Get your name under {label}.robin</h3>
+      {isOwner && (
+        <p className="promo-tag" style={{ marginBottom: 8 }}>
+          your shop is open — this is what buyers see
+        </p>
+      )}
       <p className="small faint" style={{ margin: "0 0 12px" }}>
         The owner sells subnames here — yours permanently, they can never
         revoke it. {activeCurrency === "USDG"
