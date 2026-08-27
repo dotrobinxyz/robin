@@ -15,9 +15,11 @@ import {
 } from "robin-names";
 import { ADDRESSES, CHAIN, EXPLORER } from "../config";
 import { formatDate, formatEth, formatUSDG, shortAddress } from "../lib/format";
+import { getRefTag } from "../lib/ref";
 import { useTx } from "../lib/useTx";
 import { BandChip } from "../components/BandChip";
 import { CheckIcon } from "../components/icons";
+import { ShopBuyCard, ShopOwnerCard } from "../components/ShopCards";
 
 const TEXT_KEYS = ["avatar", "url", "com.twitter", "org.telegram", "description"];
 const PARENT_CANNOT_CONTROL = 0x10000;
@@ -151,6 +153,14 @@ export function ManageName({
         </div>
       </div>
 
+      {!isOwner && (
+        <ShopBuyCard
+          label={label}
+          node={node}
+          ownerAddress={beneficialOwner}
+        />
+      )}
+
       <RenewCard
         label={label}
         inGrace={inGrace}
@@ -160,6 +170,13 @@ export function ManageName({
 
       {isOwner && (
         <>
+          <ShopOwnerCard
+            label={label}
+            node={node}
+            wrapped={wrapped}
+            fuses={wrapData?.[1] ?? 0}
+            onDone={refetch}
+          />
           <PayLinkCard label={label} />
           <RecordsCard
             label={label}
@@ -328,7 +345,12 @@ function RenewCard({
               address: ADDRESSES.controller,
               abi: robinRegistrarControllerAbi,
               functionName: "renewWithUSDG",
-              args: [label, duration, "0x".padEnd(66, "0") as Hex, fresh.base],
+              args: [
+                label,
+                duration,
+                getRefTag() ?? ("0x".padEnd(66, "0") as Hex),
+                fresh.base,
+              ],
               chain: CHAIN,
               account: address,
             }),
@@ -350,7 +372,11 @@ function RenewCard({
               address: ADDRESSES.controller,
               abi: robinRegistrarControllerAbi,
               functionName: "renew",
-              args: [label, duration, "0x".padEnd(66, "0") as Hex],
+              args: [
+                label,
+                duration,
+                getRefTag() ?? ("0x".padEnd(66, "0") as Hex),
+              ],
               value: fresh.base,
               chain: CHAIN,
               account: address,
