@@ -12,6 +12,7 @@ import { Auctions } from "./pages/Auctions";
 import { PayHome, PayPage } from "./pages/Pay";
 import { ProfilePage } from "./pages/Profile";
 import { Tickers } from "./pages/Tickers";
+import { Flock } from "./pages/Flock";
 import "./styles.css";
 
 const queryClient = new QueryClient({
@@ -41,6 +42,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               )}
             </Route>
             <Route path="/tickers" component={Tickers} />
+            <Route path="/flock" component={Flock} />
             <Route>
               <div className="empty">Nothing here.</div>
             </Route>
