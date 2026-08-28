@@ -3,7 +3,7 @@ import { useAccount } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
 import { EXPLORER, INDEXER_URL } from "../config";
 import { formatEth, formatUSDG } from "../lib/format";
-import { BandChip } from "../components/BandChip";
+import { PixelBird } from "../components/PixelBird";
 
 type FeedItem = {
   key: string;
@@ -15,22 +15,33 @@ type FeedItem = {
   txHash: string | null;
 };
 
-async function fetchFeed(): Promise<FeedItem[]> {
-  const res = await fetch(`${INDEXER_URL}/graphql`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      query: `query {
-        registrationEvents(orderBy: "timestamp", orderDirection: "desc", limit: 50) {
-          items { id label kind owner baseCost premium currency timestamp txHash }
-        }
-        subnames(orderBy: "createdAt", orderDirection: "desc", limit: 20) {
-          items { id name owner createdAt }
-        }
-      }`,
+type FeedData = {
+  items: FeedItem[];
+  totalNames: number;
+  feesUsd: number | null;
+  todayCount: number;
+};
+
+async function fetchFeed(): Promise<FeedData> {
+  const [gqlRes, statsRes] = await Promise.all([
+    fetch(`${INDEXER_URL}/graphql`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        query: `query {
+          registrationEvents(orderBy: "timestamp", orderDirection: "desc", limit: 50) {
+            items { id label kind owner baseCost premium currency timestamp txHash }
+          }
+          subnames(orderBy: "createdAt", orderDirection: "desc", limit: 20) {
+            items { id name owner createdAt }
+          }
+          stats(id: 1) { names ethRevenueWei usdgRevenue }
+        }`,
+      }),
     }),
-  });
-  const body = await res.json();
+    fetch(`${EXPLORER}/api/v2/stats`).catch(() => null),
+  ]);
+  const body = await gqlRes.json();
   const regs: FeedItem[] = body.data.registrationEvents.items.map((e: any) => {
     const paid = BigInt(e.baseCost) + BigInt(e.premium);
     return {
@@ -52,7 +63,24 @@ async function fetchFeed(): Promise<FeedItem[]> {
     timestamp: Number(s.createdAt),
     txHash: null,
   }));
-  return [...regs, ...subs].sort((a, b) => b.timestamp - a.timestamp).slice(0, 60);
+
+  const stats = body.data.stats;
+  let feesUsd: number | null = null;
+  try {
+    const price = statsRes?.ok ? Number((await statsRes.json()).coin_price) : NaN;
+    const eth = Number(BigInt(stats.ethRevenueWei)) / 1e18;
+    const usdg = Number(BigInt(stats.usdgRevenue)) / 1e6;
+    feesUsd = usdg + (Number.isFinite(price) ? eth * price : 0);
+  } catch {
+    feesUsd = null;
+  }
+  const dayAgo = Date.now() / 1000 - 86400;
+  return {
+    items: [...regs, ...subs].sort((a, b) => b.timestamp - a.timestamp).slice(0, 60),
+    totalNames: Number(stats.names),
+    feesUsd,
+    todayCount: regs.filter((r) => r.kind === "registration" && r.timestamp > dayAgo).length,
+  };
 }
 
 function ago(ts: number): string {
@@ -66,8 +94,42 @@ function ago(ts: number): string {
 const VERB: Record<FeedItem["kind"], string> = {
   registration: "banded",
   renewal: "renewed",
-  subname: "subname minted",
+  subname: "minted",
 };
+
+function NameInline({ label }: { label: string }) {
+  return (
+    <span className="feed-name">
+      {label}
+      <span className="tld">.robin</span>
+    </span>
+  );
+}
+
+function Row({ item }: { item: FeedItem }) {
+  const inner = (
+    <div className="feed-row">
+      <PixelBird name={item.label} />
+      <span className="feed-text">
+        <NameInline label={item.label} /> {VERB[item.kind]}
+        {item.cost ? ` — ${item.cost}` : ""}
+      </span>
+      <span className="feed-time">{ago(item.timestamp)}</span>
+    </div>
+  );
+  return item.txHash ? (
+    <a
+      href={`${EXPLORER}/tx/${item.txHash}`}
+      target="_blank"
+      rel="noreferrer"
+      style={{ color: "inherit", display: "block" }}
+    >
+      {inner}
+    </a>
+  ) : (
+    inner
+  );
+}
 
 export function FeedTab() {
   const { address, isConnected } = useAccount();
@@ -78,15 +140,15 @@ export function FeedTab() {
     refetchInterval: 30_000,
   });
 
-  const items = (data ?? []).filter(
+  const items = (data?.items ?? []).filter(
     (i) => !mine || (address && i.owner.toLowerCase() === address.toLowerCase()),
   );
 
   return (
     <>
-      <div className="row between" style={{ margin: "18px 0 12px" }}>
+      <div className="row between" style={{ margin: "18px 0 14px" }}>
         <div className="h1" style={{ margin: 0 }}>
-          The flock.
+          The feed.
         </div>
         {isConnected && (
           <div className="chips">
@@ -99,37 +161,40 @@ export function FeedTab() {
           </div>
         )}
       </div>
-      {isLoading && <div className="empty">reading the wires…</div>}
-      {!isLoading && items.length === 0 && (
-        <div className="empty">
-          {mine ? "nothing from your wallet yet." : "quiet out there."}
+
+      {data && !mine && (
+        <div className="pinned">
+          <div className="pinned-tag">pinned</div>
+          <div className="pinned-title">the flock is growing.</div>
+          <div className="pinned-stats">
+            {data.totalNames} names
+            {data.feesUsd != null &&
+              ` · $${Math.round(data.feesUsd).toLocaleString("en-US")} fees`}
+            {data.todayCount > 0 && ` · ${data.todayCount} today`}
+          </div>
         </div>
       )}
-      {items.map((i) => {
-        const row = (
-          <div className="feed-row" key={i.key}>
-            <BandChip name={i.label} size="sm" />
-            <span className="feed-verb">
-              {VERB[i.kind]}
-              {i.cost ? ` · ${i.cost}` : ""}
-            </span>
-            <span className="feed-time">{ago(i.timestamp)}</span>
-          </div>
-        );
-        return i.txHash ? (
-          <a
-            key={i.key}
-            href={`${EXPLORER}/tx/${i.txHash}`}
-            target="_blank"
-            rel="noreferrer"
-            style={{ color: "inherit", display: "block" }}
-          >
-            {row}
-          </a>
-        ) : (
-          row
-        );
-      })}
+
+      {isLoading && <div className="empty">reading the wires…</div>}
+      {!isLoading && items.length === 0 && (
+        <div className="empty">{mine ? "nothing from your wallet yet." : "quiet out there."}</div>
+      )}
+      {items.map((i, idx) => (
+        <div key={i.key}>
+          <Row item={i} />
+          {idx === 2 && !mine && data && data.todayCount > 0 && (
+            <div className="feed-row">
+              <span className="feed-square">
+                <span />
+              </span>
+              <span className="feed-text muted">
+                {data.todayCount} name{data.todayCount === 1 ? "" : "s"} banded today
+              </span>
+              <span className="feed-time">—</span>
+            </div>
+          )}
+        </div>
+      ))}
     </>
   );
 }

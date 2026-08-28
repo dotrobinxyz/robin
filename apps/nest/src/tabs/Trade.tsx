@@ -25,9 +25,33 @@ const SLIPPAGE_BPS = 100n; // 1%
 const MAX_UINT160 = (1n << 160n) - 1n;
 const MAX_UINT48 = (1n << 48n) - 1n;
 
-function fmtRobin(units: bigint): string {
+/** 2.1M / 645.8K style, for meme-scale ROBIN amounts. */
+function compact(units: bigint): string {
   const n = Number(formatEther(units));
-  return `${n.toLocaleString("en-US", { maximumFractionDigits: n >= 1000 ? 0 : 2 })} ROBIN`;
+  if (n >= 1e6) return `${(n / 1e6).toLocaleString("en-US", { maximumFractionDigits: 1 })}M`;
+  if (n >= 1e3) return `${(n / 1e3).toLocaleString("en-US", { maximumFractionDigits: 1 })}K`;
+  return n.toLocaleString("en-US", { maximumFractionDigits: 2 });
+}
+
+function EthIcon() {
+  return (
+    <svg className="token-ico" viewBox="0 0 16 16" fill="none">
+      <path d="M8 1.5v4.87L3.9 8.2 8 1.5z" fill="#8C8578" />
+      <path d="M8 1.5l4.1 6.7L8 6.37V1.5z" fill="#F1EADF" />
+      <path d="M8 9.1L3.9 8.2 8 14.5V9.1z" fill="#8C8578" />
+      <path d="M8 9.1v5.4l4.1-6.3L8 9.1z" fill="#F1EADF" />
+      <path d="M3.9 8.2L8 6.37 12.1 8.2 8 9.1 3.9 8.2z" fill="#B7AE9E" />
+    </svg>
+  );
+}
+
+function TokenChip({ eth }: { eth: boolean }) {
+  return (
+    <span className="token-chip">
+      {eth ? <EthIcon /> : <img className="token-ico" src="/nest/mark.svg" alt="" />}
+      {eth ? "ETH" : "ROBIN"}
+    </span>
+  );
 }
 
 export function TradeTab() {
@@ -73,12 +97,7 @@ export function TradeTab() {
         abi: quoterAbi,
         functionName: "quoteExactInputSingle",
         args: [
-          {
-            poolKey: POOL_KEY,
-            zeroForOne: buying,
-            exactAmount: amountIn!,
-            hookData: "0x",
-          },
+          { poolKey: POOL_KEY, zeroForOne: buying, exactAmount: amountIn!, hookData: "0x" },
         ],
       });
       const [sqrtPriceX96] = await publicClient!.readContract({
@@ -90,14 +109,36 @@ export function TradeTab() {
       const spot = spotFromSqrtPrice(sqrtPriceX96); // ROBIN per ETH
       const inN = Number(formatEther(amountIn!));
       const outN = Number(formatEther(out));
-      const exec = outN / inN;
       const fair = buying ? spot : 1 / spot;
-      const impact = Math.max(0, (1 - exec / fair) * 100);
-      return { out, impact };
+      const impact = Math.max(0, (1 - outN / inN / fair) * 100);
+      return { out, impact, spot };
+    },
+  });
+
+  // Spot rate for the footer line even before an amount is typed.
+  const { data: spotOnly } = useQuery({
+    queryKey: ["swap-spot"],
+    enabled: Boolean(publicClient),
+    refetchInterval: 30_000,
+    queryFn: async () => {
+      const [sqrtPriceX96] = await publicClient!.readContract({
+        address: STATE_VIEW,
+        abi: stateViewAbi,
+        functionName: "getSlot0",
+        args: [POOL_ID],
+      });
+      return spotFromSqrtPrice(sqrtPriceX96);
     },
   });
 
   const minOut = quote ? (quote.out * (10_000n - SLIPPAGE_BPS)) / 10_000n : null;
+  const spot = quote?.spot ?? spotOnly;
+  const rate =
+    spot === undefined
+      ? null
+      : buying
+        ? `1 ETH ≈ ${compact(parseEther(String(Math.round(spot))))} ROBIN`
+        : `1M ROBIN ≈ ${formatEth(parseEther(String((1e6 / spot).toFixed(8))))}`;
 
   async function swap() {
     if (!walletClient || !publicClient || !address || !amountIn || !minOut) return;
@@ -180,8 +221,8 @@ export function TradeTab() {
 
   function onSwapped() {
     setDone(
-      `Swapped. ${amount} ${buying ? "ETH" : "ROBIN"} → ~${
-        quote ? (buying ? fmtRobin(quote.out) : formatEth(quote.out)) : ""
+      `swapped ✓ ${amount} ${buying ? "ETH" : "ROBIN"} → ~${
+        quote ? (buying ? `${compact(quote.out)} ROBIN` : formatEth(quote.out)) : ""
       }`,
     );
     setAmount("");
@@ -195,64 +236,75 @@ export function TradeTab() {
 
   return (
     <>
+      <div className="h1">Trade.</div>
       <div className="card">
-        <div className="row between" style={{ marginBottom: 12 }}>
-          <h3 className="card-title" style={{ margin: 0 }}>
-            {buying ? "Buy ROBIN." : "Sell ROBIN."}
-          </h3>
-          <div className="chips">
-            <button className={`chip${buying ? " on" : ""}`} onClick={() => { setBuying(true); setDone(""); }}>
-              buy
-            </button>
-            <button className={`chip${buying ? "" : " on"}`} onClick={() => { setBuying(false); setDone(""); }}>
-              sell
-            </button>
-          </div>
-        </div>
         {done && <div className="toast">{done}</div>}
-        <div className="field">
-          <label>you pay ({buying ? "ETH" : "ROBIN"})</label>
-          <input
-            className="input mono"
-            inputMode="decimal"
-            placeholder="0.00"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-          <p className="small muted mono" style={{ margin: "6px 0 0" }}>
-            balance {buying ? formatEth(balance) : fmtRobin(balance)}
-          </p>
+
+        <div className="trade-box">
+          <label>pay</label>
+          <div className="row" style={{ gap: 10 }}>
+            <input
+              className="trade-amt"
+              inputMode="decimal"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+            <TokenChip eth={buying} />
+          </div>
+          <button
+            className="trade-balance"
+            onClick={() => setAmount(formatEther(balance))}
+          >
+            balance {buying ? formatEth(balance).replace(" ETH", "") : compact(balance)}
+          </button>
           {insufficient && (
             <p className="small" style={{ color: "#e08a7e", margin: "4px 0 0" }}>
               not enough {buying ? "ETH" : "ROBIN"}
             </p>
           )}
         </div>
-        <div className="field">
-          <label>you receive (est.)</label>
-          <p className="mono" style={{ margin: 0, fontSize: 18 }}>
-            {!amountIn ? "—" : quote ? (buying ? fmtRobin(quote.out) : formatEth(quote.out)) : "…"}
-          </p>
-          {quote && minOut !== null && (
-            <p className="small muted mono" style={{ margin: "6px 0 0" }}>
-              min received {buying ? fmtRobin(minOut) : formatEth(minOut)} · impact+fees{" "}
-              {quote.impact.toFixed(1)}%
-            </p>
-          )}
+
+        <div className="flip-wrap">
+          <button
+            className="flip-btn"
+            title="flip"
+            onClick={() => {
+              setBuying(!buying);
+              setAmount("");
+              setDone("");
+            }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 4v16" />
+              <path d="M6 14l6 6 6-6" />
+            </svg>
+          </button>
         </div>
-        {quote && quote.impact > 3 && (
-          <p className="notice danger" style={{ marginBottom: 12 }}>
-            thin pool — this order moves the price {quote.impact.toFixed(1)}%. the swap
-            reverts if you'd get less than the minimum shown.
-          </p>
-        )}
+
+        <div className="trade-box">
+          <label>receive</label>
+          <div className="row" style={{ gap: 10 }}>
+            <span className="trade-amt out">
+              {!amountIn ? "—" : quote ? `≈ ${buying ? compact(quote.out) : formatEth(quote.out).replace(" ETH", "")}` : "…"}
+            </span>
+            <TokenChip eth={!buying} />
+          </div>
+        </div>
+
+        <p className="rate-line">
+          {rate ?? "…"} · slippage 1%
+          {quote && quote.impact > 3 && (
+            <span style={{ color: "#e08a7e" }}> · moves price {quote.impact.toFixed(1)}%</span>
+          )}
+        </p>
+
         <button
           className="btn block"
           onClick={swap}
           disabled={busy !== null || !amountIn || !quote || insufficient}
         >
-          {busy ? <span className="progress-ring" /> : null}
-          {!amountIn ? "enter an amount" : buying ? "buy ROBIN" : "sell ROBIN"}
+          {busy ? <span className="progress-ring" /> : null} swap
         </button>
         {error && (
           <p className="notice danger" style={{ marginTop: 10 }}>
@@ -260,10 +312,8 @@ export function TradeTab() {
           </p>
         )}
       </div>
-      <p className="small muted" style={{ margin: "0 4px" }}>
-        routes only the canonical ETH/ROBIN pool on Uniswap v4 via the UniversalRouter,
-        with a hard minimum-received guard (1% slippage). ROBIN is a small memecoin pool —
-        prices move fast; nothing here is financial advice.
+      <p className="rate-line" style={{ marginTop: 0 }}>
+        routed via robinhood chain dexes
       </p>
     </>
   );

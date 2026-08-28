@@ -258,26 +258,155 @@ a { color: var(--green); text-decoration: none; }
 .band.xl { font-size: clamp(20px, 6vw, 32px); padding: 12px 24px; }
 
 /* feed */
+.pinned {
+  border: 1px solid var(--green);
+  border-radius: 18px;
+  padding: 16px 18px;
+  margin-bottom: 6px;
+}
+.pinned-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 6px;
+}
+.pinned-title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 21px;
+  color: var(--buff);
+}
+.pinned-stats {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--grey);
+  margin-top: 6px;
+}
 .feed-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 0;
+  gap: 13px;
+  padding: 13px 0;
   border-bottom: 1px solid var(--line);
 }
-.feed-row .feed-verb {
+.feed-row .feed-text {
   flex: 1;
   min-width: 0;
-  color: var(--grey);
-  font-size: 13px;
+  color: var(--buff);
+  font-size: 14.5px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.feed-name {
+  font-family: var(--mono);
+  color: var(--buff);
+}
+.feed-name .tld { color: var(--green); }
 .feed-row .feed-time {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--grey);
+}
+.feed-square {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #26221d;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.feed-square span {
+  width: 10px;
+  height: 10px;
+  background: var(--green);
+}
+
+/* trade */
+.trade-box {
+  background: var(--night);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+.trade-box label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--grey);
+  margin-bottom: 6px;
+}
+.trade-amt {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 30px;
+  color: var(--buff);
+}
+.trade-amt.out {
+  font-size: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trade-balance {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--grey);
+  cursor: pointer;
+}
+.token-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--line);
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--buff);
+  flex: none;
+}
+.token-ico { width: 17px; height: 17px; display: block; }
+.flip-wrap {
+  display: flex;
+  justify-content: center;
+  margin: -7px 0;
+  position: relative;
+  z-index: 2;
+}
+.flip-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--green);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.flip-btn svg { width: 17px; height: 17px; }
+.rate-line {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--grey);
+  margin: 12px 0 14px;
 }
 
 /* connect sheet */
