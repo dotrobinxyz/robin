@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { useAccount, useBalance, useReadContract } from "wagmi";
+import { useBalance, useReadContract } from "wagmi";
+import { useActive } from "../lib/activeAccount";
 import { erc20Abi, formatEther, parseEther } from "viem";
 import { useQuery } from "@tanstack/react-query";
 import { CHAIN } from "../config";
@@ -56,7 +57,9 @@ function TokenChip({ eth }: { eth: boolean }) {
 }
 
 export function TradeTab() {
-  const { address, isConnected } = useAccount();
+  const active = useActive();
+  const address = active.address;
+  const isConnected = active.kind !== "none";
   const { run, busy, error, walletClient, publicClient } = useTx();
   const [buying, setBuying] = useState(true); // true: ETH -> ROBIN
   const [amount, setAmount] = useState("");

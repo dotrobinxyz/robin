@@ -1,6 +1,18 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { verifyMessage } from "viem";
+import { createPublicClient, defineChain, http } from "viem";
 import type { Context } from "hono";
+
+// On-chain verifier: handles EOAs and smart accounts alike (ERC-1271 —
+// the nest passkey wallet signs sessions through isValidSignature).
+const chain = defineChain({
+  id: 4663,
+  name: "Robinhood Chain",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: { http: [process.env.RPC_URL ?? "https://robinhood-rpc.publicnode.com"] },
+  },
+});
+const verifier = createPublicClient({ chain, transport: http() });
 
 /**
  * Session auth: the wallet signs one message, the service hands back an
@@ -29,11 +41,13 @@ export async function issueToken(
 ): Promise<string | null> {
   const now = Math.floor(Date.now() / 1000);
   if (Math.abs(now - issuedAt) > SKEW) return null;
-  const ok = await verifyMessage({
-    address: address as `0x${string}`,
-    message: sessionMessage(address, issuedAt),
-    signature,
-  }).catch(() => false);
+  const ok = await verifier
+    .verifyMessage({
+      address: address as `0x${string}`,
+      message: sessionMessage(address, issuedAt),
+      signature,
+    })
+    .catch(() => false);
   if (!ok) return null;
   const payload = Buffer.from(
     JSON.stringify({ a: address.toLowerCase(), e: now + SESSION_TTL }),

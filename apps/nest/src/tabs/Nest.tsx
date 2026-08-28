@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useAccount, useReadContract } from "wagmi";
+import { useReadContract } from "wagmi";
 import { namehash } from "viem/ens";
+import { useActive } from "../lib/activeAccount";
 import { useQuery } from "@tanstack/react-query";
 import { robinBaseRegistrarAbi, robinTokenId } from "robin-names";
 import { GOLD_BAND, goldAbi } from "../lib/gold";
@@ -177,7 +178,9 @@ function Tokens({ address }: { address: `0x${string}` }) {
 }
 
 export function NestTab({ onPay }: { onPay: (name: string) => void }) {
-  const { address, isConnected } = useAccount();
+  const active = useActive();
+  const address = active.address;
+  const isConnected = active.kind !== "none";
   const [registering, setRegistering] = useState(false);
   const [profile, setProfile] = useState<string | null>(null);
   const { data, refetch } = useQuery({

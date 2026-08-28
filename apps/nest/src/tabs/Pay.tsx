@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import {
-  useAccount,
   useBalance,
   useEnsAddress,
   useEnsName,
   useReadContract,
 } from "wagmi";
+import { useActive } from "../lib/activeAccount";
 import { erc20Abi, parseUnits, type Address } from "viem";
 import { namehash } from "viem/ens";
 import { GOLD_BAND, goldAbi } from "../lib/gold";
@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { renderSVG } from "uqr";
 import { CHAIN, EXPLORER, SITE } from "../config";
 import { toFullName } from "../lib/names";
-import { formatEth } from "../lib/format";
+import { formatEth, shortAddress } from "../lib/format";
 import { useTx } from "../lib/useTx";
 import { BandChip } from "../components/BandChip";
 
@@ -25,7 +25,9 @@ type TokenOpt = {
 };
 
 export function PayTab({ prefill }: { prefill?: string }) {
-  const { address, isConnected } = useAccount();
+  const active = useActive();
+  const address = active.address;
+  const isConnected = active.kind !== "none";
   const { run, busy, error, walletClient } = useTx();
   const { data: primary } = useEnsName({
     address,
@@ -143,6 +145,10 @@ export function PayTab({ prefill }: { prefill?: string }) {
     () => (myPayUrl ? renderSVG(myPayUrl, { ecc: "M", border: 2 }) : null),
     [myPayUrl],
   );
+  const addrQr = useMemo(
+    () => (!myPayUrl && address ? renderSVG(address, { ecc: "M", border: 2 }) : null),
+    [myPayUrl, address],
+  );
 
   if (!isConnected) {
     return <div className="empty">connect a wallet to send + receive.</div>;
@@ -254,13 +260,19 @@ export function PayTab({ prefill }: { prefill?: string }) {
               {myPayUrl.replace("https://", "")}
             </p>
           </>
+        ) : addrQr && address ? (
+          <>
+            <div className="qr-tile" dangerouslySetInnerHTML={{ __html: addrQr }} />
+            <p
+              className="small mono muted"
+              style={{ textAlign: "center", margin: "8px 0 0" }}
+            >
+              {shortAddress(address)}
+            </p>
+          </>
         ) : (
           <p className="small muted" style={{ margin: 0 }}>
-            Set a primary name on{" "}
-            <a href={SITE} target="_blank" rel="noreferrer">
-              dotrobin.xyz
-            </a>{" "}
-            and your payment QR appears here.
+            connect to receive.
           </p>
         )}
       </div>

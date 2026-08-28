@@ -1,4 +1,4 @@
-import type { WalletClient } from "viem";
+import type { SessionSigner } from "./signer";
 
 /**
  * Client for the nest-social service. One wallet signature opens a 30-day
@@ -49,19 +49,14 @@ export function clearSession(): void {
   localStorage.removeItem(KEY);
 }
 
-/** Sign in (one wallet signature) unless a session for this address exists. */
-export async function ensureSession(
-  walletClient: WalletClient,
-  address: string,
-): Promise<Stored> {
+/** Sign in (one signature) unless a session for this address exists. */
+export async function ensureSession(signer: SessionSigner): Promise<Stored> {
+  const address = signer.address;
   const existing = storedSession(address);
   if (existing) return existing;
   const issuedAt = Math.floor(Date.now() / 1000);
   const message = `nest social session\naddress: ${address.toLowerCase()}\nissued: ${issuedAt}`;
-  const signature = await walletClient.signMessage({
-    account: address as `0x${string}`,
-    message,
-  });
+  const signature = await signer.signMessage(message);
   const res = await fetch(`${SOCIAL}/session`, {
     method: "POST",
     headers: { "content-type": "application/json" },

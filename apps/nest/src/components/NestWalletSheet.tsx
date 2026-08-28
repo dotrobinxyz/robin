@@ -4,6 +4,7 @@ import { isAddress, parseEther, type Address } from "viem";
 import { useQuery } from "@tanstack/react-query";
 import { renderSVG } from "uqr";
 import { EXPLORER } from "../config";
+import { useActiveRefresh } from "../lib/activeAccount";
 import { formatEth, shortAddress } from "../lib/format";
 import { toFullName } from "../lib/names";
 import {
@@ -22,6 +23,7 @@ import {
  */
 export function NestWalletSheet({ onClose }: { onClose: () => void }) {
   const publicClient = usePublicClient();
+  const refreshActive = useActiveRefresh();
   const [wallet, setWallet] = useState<NestWallet | null>(() => storedWallet());
   const [busy, setBusy] = useState(false);
   const [phase, setPhase] = useState<SendPhase | null>(null);
@@ -68,6 +70,7 @@ export function NestWalletSheet({ onClose }: { onClose: () => void }) {
     setError("");
     try {
       setWallet(await createWallet());
+      refreshActive();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -226,6 +229,7 @@ export function NestWalletSheet({ onClose }: { onClose: () => void }) {
                 ) {
                   forgetWallet();
                   setWallet(null);
+                  refreshActive();
                 }
               }}
             >

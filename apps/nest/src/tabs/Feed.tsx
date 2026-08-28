@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { useAccount, useWalletClient } from "wagmi";
 import { namehash } from "viem/ens";
+import { useActive } from "../lib/activeAccount";
+import { useSessionSigner } from "../lib/signer";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EXPLORER, INDEXER_URL } from "../config";
 import { formatEth, formatUSDG } from "../lib/format";
@@ -170,8 +171,10 @@ const NOTIF_TEXT: Record<Notification["kind"], string> = {
 };
 
 export function FeedTab({ onPay }: { onPay: (name: string) => void }) {
-  const { address, isConnected } = useAccount();
-  const { data: walletClient } = useWalletClient();
+  const active = useActive();
+  const address = active.address;
+  const isConnected = active.kind !== "none";
+  const signer = useSessionSigner();
   const queryClient = useQueryClient();
   const [scope, setScope] = useState<"all" | "following" | "mine">("all");
   const [profile, setProfile] = useState<string | null>(null);
@@ -208,8 +211,8 @@ export function FeedTab({ onPay }: { onPay: (name: string) => void }) {
   const unread = (inbox?.notifications ?? []).filter((n) => !n.read).length;
 
   async function signIn() {
-    if (!walletClient || !address) throw new Error("connect a wallet first");
-    const s = await ensureSession(walletClient, address);
+    if (!signer) throw new Error("connect a wallet first");
+    const s = await ensureSession(signer);
     setSession(s);
     return s;
   }

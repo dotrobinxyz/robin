@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useAccount, useEnsName, useReadContract } from "wagmi";
+import { useEnsName, useReadContract } from "wagmi";
+import { useActive } from "../lib/activeAccount";
 import { erc20Abi, type Hex } from "viem";
 import { namehash } from "viem/ens";
 import { GOLD_BAND, goldAbi } from "../lib/gold";
@@ -32,7 +33,7 @@ export function ManageSheet({
   onClose: () => void;
   onChanged: () => void;
 }) {
-  const { address } = useAccount();
+  const address = useActive().address;
   const { run, busy, error, walletClient, publicClient } = useTx();
   const { data: primary, refetch: refetchPrimary } = useEnsName({
     address,

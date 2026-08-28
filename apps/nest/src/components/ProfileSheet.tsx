@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { useAccount, useEnsAddress, useEnsName, useReadContract, useWalletClient } from "wagmi";
+import { useEnsAddress, useEnsName, useReadContract } from "wagmi";
 import { namehash } from "viem/ens";
 import { useQuery } from "@tanstack/react-query";
 import { EXPLORER, INDEXER_URL } from "../config";
+import { useActive } from "../lib/activeAccount";
+import { useSessionSigner } from "../lib/signer";
 import { formatEth, shortAddress } from "../lib/format";
 import { GOLD_BAND, goldAbi } from "../lib/gold";
 import { ensureSession, social, storedSession } from "../lib/social";
@@ -30,8 +32,9 @@ export function ProfileSheet({
   const [socialError, setSocialError] = useState("");
   const full = `${label}.robin`;
   const node = namehash(full);
-  const { address: myAddress } = useAccount();
-  const { data: walletClient } = useWalletClient();
+  const active = useActive();
+  const myAddress = active.address;
+  const signer = useSessionSigner();
   const session = storedSession(myAddress);
   const myLabel = session?.name?.replace(/\.robin$/, "") ?? null;
 
@@ -47,9 +50,7 @@ export function ProfileSheet({
   async function withSession<T>(fn: (tok: string) => Promise<T>) {
     setSocialError("");
     try {
-      const s =
-        session ??
-        (walletClient && myAddress ? await ensureSession(walletClient, myAddress) : null);
+      const s = session ?? (signer ? await ensureSession(signer) : null);
       if (!s) throw new Error("connect a wallet first");
       await fn(s.token);
     } catch (e) {

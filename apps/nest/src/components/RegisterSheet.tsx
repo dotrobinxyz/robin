@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useAccount, useEnsName, useReadContract, useReadContracts } from "wagmi";
+import { useEnsName, useReadContract, useReadContracts } from "wagmi";
+import { useActive } from "../lib/activeAccount";
 import { encodeFunctionData, erc20Abi } from "viem";
 import {
   REVERSE_RECORD_CHAIN,
@@ -38,7 +39,9 @@ export function RegisterSheet({
   onDone: () => void;
   onViewProfile: (label: string) => void;
 }) {
-  const { address, isConnected } = useAccount();
+  const activeAccount = useActive();
+  const address = activeAccount.address;
+  const isConnected = activeAccount.kind !== "none";
   const { run, busy, error, setError, walletClient, publicClient } = useTx();
   const { data: myPrimary } = useEnsName({
     address,

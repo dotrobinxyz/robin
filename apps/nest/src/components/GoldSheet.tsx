@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useAccount, useReadContract } from "wagmi";
+import { useReadContract } from "wagmi";
+import { useActive } from "../lib/activeAccount";
 import { erc20Abi } from "viem";
 import { namehash } from "viem/ens";
 import { ADDRESSES, CHAIN } from "../config";
@@ -21,7 +22,7 @@ export function GoldSheet({
   onDone?: () => void;
 }) {
   const node = namehash(`${label}.robin`);
-  const { address } = useAccount();
+  const address = useActive().address;
   const { run, busy, error, walletClient, publicClient } = useTx();
   const [yearly, setYearly] = useState(true);
   const [currency, setCurrency] = useState<"USDG" | "ETH">("USDG");
