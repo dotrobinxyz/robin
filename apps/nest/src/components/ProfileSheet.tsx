@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { useEnsAddress, useEnsName, useReadContract } from "wagmi";
+import { useAccount, useEnsAddress, useEnsName, useReadContract, useWalletClient } from "wagmi";
 import { namehash } from "viem/ens";
 import { useQuery } from "@tanstack/react-query";
 import { EXPLORER, INDEXER_URL } from "../config";
 import { formatEth, shortAddress } from "../lib/format";
 import { GOLD_BAND, goldAbi } from "../lib/gold";
+import { ensureSession, social, storedSession } from "../lib/social";
 import { BandChip } from "./BandChip";
+import { ChirpRow } from "./ChirpRow";
 import { GoldSheet } from "./GoldSheet";
 import { PixelBird } from "./PixelBird";
 
@@ -25,8 +27,42 @@ export function ProfileSheet({
 }) {
   const [label, setLabel] = useState(initial);
   const [goldOpen, setGoldOpen] = useState(false);
+  const [socialError, setSocialError] = useState("");
   const full = `${label}.robin`;
   const node = namehash(full);
+  const { address: myAddress } = useAccount();
+  const { data: walletClient } = useWalletClient();
+  const session = storedSession(myAddress);
+  const myLabel = session?.name?.replace(/\.robin$/, "") ?? null;
+
+  const { data: follows, refetch: refetchFollows } = useQuery({
+    queryKey: ["follows", label, session?.token ?? ""],
+    queryFn: () => social.follows(label, session?.token),
+  });
+  const { data: theirChirps, refetch: refetchChirps } = useQuery({
+    queryKey: ["profile-chirps", label, session?.token ?? ""],
+    queryFn: () => social.chirpsOf(label, session?.token),
+  });
+
+  async function withSession<T>(fn: (tok: string) => Promise<T>) {
+    setSocialError("");
+    try {
+      const s =
+        session ??
+        (walletClient && myAddress ? await ensureSession(walletClient, myAddress) : null);
+      if (!s) throw new Error("connect a wallet first");
+      await fn(s.token);
+    } catch (e) {
+      setSocialError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  function toggleFollow() {
+    void withSession(async (tok) => {
+      await social.follow(tok, label, !follows?.followedByMe);
+      refetchFollows();
+    });
+  }
 
   const { data: gold, refetch: refetchGold } = useReadContract({
     address: GOLD_BAND,
@@ -132,9 +168,25 @@ export function ProfileSheet({
                 : addr === null
                   ? "no address set"
                   : "…"}
+              {follows &&
+                ` · ${follows.followers} follower${follows.followers === 1 ? "" : "s"}`}
             </p>
           </div>
+          {myLabel !== label && (
+            <button
+              className={`btn small${follows?.followedByMe ? " secondary" : ""}`}
+              style={{ marginLeft: "auto", flex: "none" }}
+              onClick={toggleFollow}
+            >
+              {follows?.followedByMe ? "following ✓" : "follow"}
+            </button>
+          )}
         </div>
+        {socialError && (
+          <p className="notice danger" style={{ margin: "10px 0 0" }}>
+            {socialError}
+          </p>
+        )}
 
         {records?.description && (
           <p style={{ margin: "14px 0 0", fontSize: 14.5 }}>{records.description}</p>
@@ -202,6 +254,28 @@ export function ProfileSheet({
                   </button>
                 ))}
             </div>
+          </div>
+        )}
+
+        {theirChirps && theirChirps.chirps.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <p className="small muted mono" style={{ margin: "0 0 4px" }}>
+              chirps
+            </p>
+            {theirChirps.chirps.slice(0, 10).map((c) => (
+              <ChirpRow
+                key={c.id}
+                chirp={c}
+                mine={c.name === myLabel}
+                onOpenProfile={(l) => setLabel(l)}
+                onLike={(chirp) =>
+                  void withSession(async (tok) => {
+                    await social.like(tok, chirp.id, !chirp.liked);
+                    refetchChirps();
+                  })
+                }
+              />
+            ))}
           </div>
         )}
 

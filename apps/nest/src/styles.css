@@ -333,6 +333,100 @@ a { color: var(--green); text-decoration: none; }
   background: var(--green);
 }
 
+/* social */
+.compose {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.compose-input {
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--ui);
+  font-size: 15px;
+  color: var(--buff);
+  margin-bottom: 8px;
+}
+.chirp {
+  display: flex;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+}
+.chirp-author {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 13.5px;
+  color: var(--buff);
+}
+.chirp-author .tld { color: var(--green); }
+.chirp-body {
+  display: block;
+  font-size: 14.5px;
+  line-height: 1.45;
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.chirp-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--green);
+  cursor: pointer;
+}
+.chirp-img {
+  display: block;
+  max-width: 100%;
+  border-radius: 12px;
+  margin-top: 8px;
+  border: 1px solid var(--line);
+}
+.chirp-actions { display: flex; gap: 18px; margin-top: 8px; }
+.chirp-act {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--grey);
+  cursor: pointer;
+}
+.chirp-act.on { color: #e08a7e; }
+.bell {
+  position: relative;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  color: var(--grey);
+  font-size: 14px;
+  cursor: pointer;
+}
+.bell-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--green);
+  color: var(--night);
+  font-family: var(--mono);
+  font-size: 9px;
+  border-radius: 999px;
+  min-width: 15px;
+  height: 15px;
+  line-height: 15px;
+}
+
 /* trade */
 .trade-box {
   background: var(--night);
