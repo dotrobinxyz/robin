@@ -428,6 +428,8 @@ a { color: var(--green); text-decoration: none; }
   border-radius: 22px 22px 0 0;
   padding: 20px 20px calc(24px + env(safe-area-inset-bottom));
 }
+.sheet.scroll { max-height: 84dvh; overflow-y: auto; }
+.feed-row[role="button"] { cursor: pointer; }
 .wallet-opt {
   display: flex;
   align-items: center;

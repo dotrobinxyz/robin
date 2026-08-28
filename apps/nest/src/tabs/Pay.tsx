@@ -21,7 +21,7 @@ type TokenOpt = {
   balance: bigint;
 };
 
-export function PayTab() {
+export function PayTab({ prefill }: { prefill?: string }) {
   const { address, isConnected } = useAccount();
   const { run, busy, error, walletClient } = useTx();
   const { data: primary } = useEnsName({
@@ -29,7 +29,7 @@ export function PayTab() {
     query: { enabled: Boolean(address) },
   });
 
-  const [to, setTo] = useState("");
+  const [to, setTo] = useState(prefill ?? "");
   const [amount, setAmount] = useState("");
   const [tokenIdx, setTokenIdx] = useState(0);
   const [sent, setSent] = useState("");

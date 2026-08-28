@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { EXPLORER, INDEXER_URL } from "../config";
 import { formatEth, formatUSDG } from "../lib/format";
 import { PixelBird } from "../components/PixelBird";
+import { ProfileSheet } from "../components/ProfileSheet";
 
 type FeedItem = {
   key: string;
@@ -106,9 +107,9 @@ function NameInline({ label }: { label: string }) {
   );
 }
 
-function Row({ item }: { item: FeedItem }) {
-  const inner = (
-    <div className="feed-row">
+function Row({ item, onOpen }: { item: FeedItem; onOpen: (label: string) => void }) {
+  return (
+    <div className="feed-row" role="button" onClick={() => onOpen(item.label)}>
       <PixelBird name={item.label} />
       <span className="feed-text">
         <NameInline label={item.label} /> {VERB[item.kind]}
@@ -117,23 +118,12 @@ function Row({ item }: { item: FeedItem }) {
       <span className="feed-time">{ago(item.timestamp)}</span>
     </div>
   );
-  return item.txHash ? (
-    <a
-      href={`${EXPLORER}/tx/${item.txHash}`}
-      target="_blank"
-      rel="noreferrer"
-      style={{ color: "inherit", display: "block" }}
-    >
-      {inner}
-    </a>
-  ) : (
-    inner
-  );
 }
 
-export function FeedTab() {
+export function FeedTab({ onPay }: { onPay: (name: string) => void }) {
   const { address, isConnected } = useAccount();
   const [mine, setMine] = useState(false);
+  const [profile, setProfile] = useState<string | null>(null);
   const { data, isLoading } = useQuery({
     queryKey: ["feed"],
     queryFn: fetchFeed,
@@ -181,7 +171,7 @@ export function FeedTab() {
       )}
       {items.map((i, idx) => (
         <div key={i.key}>
-          <Row item={i} />
+          <Row item={i} onOpen={setProfile} />
           {idx === 2 && !mine && data && data.todayCount > 0 && (
             <div className="feed-row">
               <span className="feed-square">
@@ -195,6 +185,9 @@ export function FeedTab() {
           )}
         </div>
       ))}
+      {profile && (
+        <ProfileSheet label={profile} onClose={() => setProfile(null)} onPay={onPay} />
+      )}
     </>
   );
 }

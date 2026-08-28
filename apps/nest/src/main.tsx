@@ -161,6 +161,12 @@ function Connect() {
 
 function App() {
   const [tab, setTab] = useState<Tab>("nest");
+  const [payTo, setPayTo] = useState("");
+
+  const openPay = (name: string) => {
+    setPayTo(name);
+    setTab("pay");
+  };
 
   return (
     <>
@@ -173,10 +179,10 @@ function App() {
           <div className="spacer" />
           <Connect />
         </header>
-        {tab === "nest" && <NestTab />}
-        {tab === "pay" && <PayTab />}
+        {tab === "nest" && <NestTab onPay={openPay} />}
+        {tab === "pay" && <PayTab prefill={payTo} />}
         {tab === "trade" && <TradeTab />}
-        {tab === "feed" && <FeedTab />}
+        {tab === "feed" && <FeedTab onPay={openPay} />}
       </div>
       <nav className="tabbar">
         <button className={tab === "nest" ? "on" : ""} onClick={() => setTab("nest")}>

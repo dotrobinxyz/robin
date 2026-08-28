@@ -2,10 +2,12 @@ import { useState } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
 import { robinBaseRegistrarAbi, robinTokenId } from "robin-names";
-import { ADDRESSES, EXPLORER, INDEXER_URL, SITE } from "../config";
+import { ADDRESSES, EXPLORER, INDEXER_URL } from "../config";
 import { formatDate, formatEth } from "../lib/format";
 import { BandChip } from "../components/BandChip";
 import { ManageSheet } from "../components/ManageSheet";
+import { ProfileSheet } from "../components/ProfileSheet";
+import { RegisterSheet } from "../components/RegisterSheet";
 
 type IndexedName = {
   id: string;
@@ -165,8 +167,10 @@ function Tokens({ address }: { address: `0x${string}` }) {
   );
 }
 
-export function NestTab() {
+export function NestTab({ onPay }: { onPay: (name: string) => void }) {
   const { address, isConnected } = useAccount();
+  const [registering, setRegistering] = useState(false);
+  const [profile, setProfile] = useState<string | null>(null);
   const { data, refetch } = useQuery({
     queryKey: ["nest-owned", address],
     enabled: Boolean(address),
@@ -187,12 +191,25 @@ export function NestTab() {
 
   return (
     <>
-      <div className="h1">Your nest.</div>
+      <div className="row between" style={{ margin: "18px 0 12px" }}>
+        <div className="h1" style={{ margin: 0 }}>
+          Your nest.
+        </div>
+        <button className="btn small secondary" onClick={() => setRegistering(true)}>
+          + band a name
+        </button>
+      </div>
       {named.length === 0 && (
         <div className="card">
           <p className="muted" style={{ margin: 0 }}>
             No birds yet —{" "}
-            <a href={SITE} target="_blank" rel="noreferrer">
+            <a
+              href="#band"
+              onClick={(e) => {
+                e.preventDefault();
+                setRegistering(true);
+              }}
+            >
               band your first name
             </a>{" "}
             and it lives here.
@@ -219,6 +236,16 @@ export function NestTab() {
         </div>
       )}
       <Tokens address={address} />
+      {registering && (
+        <RegisterSheet
+          onClose={() => setRegistering(false)}
+          onDone={() => refetch()}
+          onViewProfile={(l) => setProfile(l)}
+        />
+      )}
+      {profile && (
+        <ProfileSheet label={profile} onClose={() => setProfile(null)} onPay={onPay} />
+      )}
     </>
   );
 }
