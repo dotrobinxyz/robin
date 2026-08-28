@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { robinBaseRegistrarAbi, robinTokenId } from "robin-names";
 import { GOLD_BAND, goldAbi } from "../lib/gold";
 import { ADDRESSES, EXPLORER, INDEXER_URL } from "../config";
-import { formatDate, formatEth } from "../lib/format";
+import { formatEth } from "../lib/format";
 import { BandChip } from "../components/BandChip";
 import { ManageSheet } from "../components/ManageSheet";
 import { ProfileSheet } from "../components/ProfileSheet";
@@ -83,9 +83,7 @@ function BirdCard({ name, onChanged }: { name: IndexedName; onChanged: () => voi
         <span className="row" style={{ gap: 6, minWidth: 0 }}>
           <BandChip name={name.label!} size="sm" variant="green-outline" />
           {gold && <span className="tag gold">✦</span>}
-        </span>
-        <span className="exp">
-          {soon ? "⚠ " : ""}expires {formatDate(name.expiresAt)}
+          {soon && <span className="exp">⚠ expiring</span>}
         </span>
         <button className="btn small" onClick={() => setManaging(true)}>
           manage
