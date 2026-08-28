@@ -9,7 +9,10 @@ import {
   useSwitchChain,
 } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { namehash } from "viem/ens";
+import { useReadContract } from "wagmi";
 import { CHAIN, SITE, wagmiConfig } from "./config";
+import { GOLD_BAND, goldAbi } from "./lib/gold";
 import { NestTab } from "./tabs/Nest";
 import { PayTab } from "./tabs/Pay";
 import { FeedTab } from "./tabs/Feed";
@@ -105,6 +108,15 @@ function Connect() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected]);
 
+  const { data: primaryGold } = useReadContract({
+    address: GOLD_BAND,
+    abi: goldAbi,
+    functionName: "isGold",
+    args: primary ? [namehash(primary)] : undefined,
+    query: { enabled: Boolean(primary) },
+  });
+  const [account, setAccount] = useState(false);
+
   if (isConnected && address) {
     if (wrongChain) {
       return (
@@ -119,20 +131,53 @@ function Connect() {
     }
     const label = primary?.replace(/\.robin$/, "");
     return (
-      <button
-        style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
-        onClick={() => disconnect()}
-        title="disconnect"
-      >
-        {label ? (
+      <>
+        <button
+          style={{ background: "none", border: "none", padding: "6px 0", cursor: "pointer" }}
+          onClick={() => setAccount(true)}
+          title="account"
+        >
           <span className="band sm">
-            {label}
-            <span className="tld">.robin</span>
+            {primaryGold && <span style={{ color: "#e8c24a", marginRight: 6 }}>✦</span>}
+            {label ?? shortAddress(address)}
+            {label && <span className="tld">.robin</span>}
           </span>
-        ) : (
-          <span className="band sm">{shortAddress(address)}</span>
+        </button>
+        {account && (
+          <div className="sheet-back" onClick={() => setAccount(false)}>
+            <div className="sheet" onClick={(e) => e.stopPropagation()}>
+              <div className="row" style={{ gap: 10 }}>
+                <span className="band sm">
+                  {primaryGold && <span style={{ color: "#e8c24a", marginRight: 6 }}>✦</span>}
+                  {label ?? shortAddress(address)}
+                  {label && <span className="tld">.robin</span>}
+                </span>
+              </div>
+              <p className="small mono muted" style={{ margin: "12px 0 0", wordBreak: "break-all" }}>
+                {address}
+              </p>
+              <div className="row" style={{ gap: 10, marginTop: 16 }}>
+                <button
+                  className="chip"
+                  onClick={() => navigator.clipboard?.writeText(address).catch(() => {})}
+                >
+                  copy address
+                </button>
+                <button
+                  className="chip"
+                  style={{ borderColor: "#e08a7e", color: "#e08a7e" }}
+                  onClick={() => {
+                    setAccount(false);
+                    disconnect();
+                  }}
+                >
+                  disconnect
+                </button>
+              </div>
+            </div>
+          </div>
         )}
-      </button>
+      </>
     );
   }
 

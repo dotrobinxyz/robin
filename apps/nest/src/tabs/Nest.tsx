@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useAccount, useReadContract } from "wagmi";
+import { namehash } from "viem/ens";
 import { useQuery } from "@tanstack/react-query";
 import { robinBaseRegistrarAbi, robinTokenId } from "robin-names";
+import { GOLD_BAND, goldAbi } from "../lib/gold";
 import { ADDRESSES, EXPLORER, INDEXER_URL } from "../config";
 import { formatDate, formatEth } from "../lib/format";
 import { BandChip } from "../components/BandChip";
@@ -47,6 +49,12 @@ async function fetchOwned(owner: string): Promise<{
 /** One bird: on-chain art straight from the registrar's tokenURI. */
 function BirdCard({ name, onChanged }: { name: IndexedName; onChanged: () => void }) {
   const [managing, setManaging] = useState(false);
+  const { data: gold } = useReadContract({
+    address: GOLD_BAND,
+    abi: goldAbi,
+    functionName: "isGold",
+    args: [namehash(`${name.label}.robin`)],
+  });
   const { data: uri } = useReadContract({
     address: ADDRESSES.baseRegistrar,
     abi: robinBaseRegistrarAbi,
@@ -72,7 +80,10 @@ function BirdCard({ name, onChanged }: { name: IndexedName; onChanged: () => voi
     <div className="bird-card">
       {image && <img src={image} alt={`${name.label}.robin`} loading="lazy" />}
       <div className="meta">
-        <BandChip name={name.label!} size="sm" variant="green-outline" />
+        <span className="row" style={{ gap: 6, minWidth: 0 }}>
+          <BandChip name={name.label!} size="sm" variant="green-outline" />
+          {gold && <span className="tag gold">✦</span>}
+        </span>
         <span className="exp">
           {soon ? "⚠ " : ""}expires {formatDate(name.expiresAt)}
         </span>

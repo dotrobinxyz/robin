@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { usePublicClient, useWalletClient } from "wagmi";
 import type { Hex } from "viem";
+import { CHAIN } from "../config";
 
 /**
  * Minimal write-and-wait helper: runs a sequence of transactions (each built
@@ -22,6 +23,17 @@ export function useTx() {
     setBusy(label);
     setError(null);
     try {
+      // Wallets drift back to other chains (esp. iOS in-app browsers where
+      // the switch prompt gets lost) — ensure the chain right before signing.
+      const current = await walletClient.getChainId();
+      if (current !== CHAIN.id) {
+        try {
+          await walletClient.switchChain({ id: CHAIN.id });
+        } catch {
+          await walletClient.addChain({ chain: CHAIN });
+          await walletClient.switchChain({ id: CHAIN.id }).catch(() => {});
+        }
+      }
       for (const step of steps) {
         const hash = await step();
         if (hash) await publicClient.waitForTransactionReceipt({ hash });

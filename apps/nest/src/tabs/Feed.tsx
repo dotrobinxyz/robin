@@ -9,7 +9,7 @@ import { ProfileSheet } from "../components/ProfileSheet";
 
 type FeedItem = {
   key: string;
-  kind: "registration" | "renewal" | "subname";
+  kind: "registration" | "renewal" | "subname" | "gold";
   label: string;
   owner: string;
   cost: string | null;
@@ -39,7 +39,7 @@ async function fetchFeed(): Promise<FeedData> {
             items { id name owner createdAt }
           }
           stats(id: 1) { names ethRevenueWei usdgRevenue }
-          goldBands(limit: 500) { items { node until } }
+          goldBands(limit: 500) { items { node label until updatedAt } }
         }`,
       }),
     }),
@@ -79,14 +79,31 @@ async function fetchFeed(): Promise<FeedData> {
     feesUsd = null;
   }
   const nowSec = Date.now() / 1000;
+  const goldRows = (body.data.goldBands?.items ?? []) as {
+    node: string;
+    label: string | null;
+    until: string;
+    updatedAt: string;
+  }[];
   const goldNodes = new Set<string>(
-    ((body.data.goldBands?.items ?? []) as { node: string; until: string }[])
-      .filter((g) => Number(g.until) > nowSec)
-      .map((g) => g.node.toLowerCase()),
+    goldRows.filter((g) => Number(g.until) > nowSec).map((g) => g.node.toLowerCase()),
   );
+  const golds: FeedItem[] = goldRows
+    .filter((g) => g.label)
+    .map((g) => ({
+      key: `gold-${g.node}`,
+      kind: "gold" as const,
+      label: g.label!,
+      owner: "",
+      cost: null,
+      timestamp: Number(g.updatedAt),
+      txHash: null,
+    }));
   const dayAgo = nowSec - 86400;
   return {
-    items: [...regs, ...subs].sort((a, b) => b.timestamp - a.timestamp).slice(0, 60),
+    items: [...regs, ...subs, ...golds]
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, 60),
     totalNames: Number(stats.names),
     feesUsd,
     todayCount: regs.filter((r) => r.kind === "registration" && r.timestamp > dayAgo).length,
@@ -106,6 +123,7 @@ const VERB: Record<FeedItem["kind"], string> = {
   registration: "banded",
   renewal: "renewed",
   subname: "minted",
+  gold: "went gold",
 };
 
 function NameInline({ label }: { label: string }) {
@@ -128,9 +146,14 @@ function Row({
 }) {
   return (
     <div className="feed-row" role="button" onClick={() => onOpen(item.label)}>
-      <PixelBird name={item.label} gold={gold} />
+      <PixelBird name={item.label} gold={gold || item.kind === "gold"} />
       <span className="feed-text">
-        <NameInline label={item.label} /> {VERB[item.kind]}
+        <NameInline label={item.label} />{" "}
+        {item.kind === "gold" ? (
+          <span style={{ color: "#e8c24a" }}>went gold ✦</span>
+        ) : (
+          VERB[item.kind]
+        )}
         {item.cost ? ` — ${item.cost}` : ""}
       </span>
       <span className="feed-time">{ago(item.timestamp)}</span>

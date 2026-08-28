@@ -526,14 +526,35 @@ ponder.on("RobinReservedList:ReservationChanged", async ({ event, context }) => 
 // ---------------------------------------------------------------------------
 
 ponder.on("RobinGoldBand:GoldExtended", async ({ event, context }) => {
+  // Resolve the human label (2LD first, wrapped subname fallback) so the
+  // feed can announce the gilding by name.
+  let label: string | null = null;
+  const twoLd = await context.db.sql
+    .select()
+    .from(name)
+    .where(eq(name.node, event.args.node))
+    .limit(1);
+  if (twoLd[0]?.label) {
+    label = twoLd[0].label;
+  } else {
+    const sub = await context.db.sql
+      .select()
+      .from(subname)
+      .where(eq(subname.id, event.args.node))
+      .limit(1);
+    if (sub[0]?.name) label = sub[0].name.replace(/\.robin$/, "");
+  }
+
   await context.db
     .insert(goldBand)
     .values({
       node: event.args.node,
+      label,
       until: event.args.until,
       updatedAt: event.block.timestamp,
     })
     .onConflictDoUpdate({
+      label,
       until: event.args.until,
       updatedAt: event.block.timestamp,
     });

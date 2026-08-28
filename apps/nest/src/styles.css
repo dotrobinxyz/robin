@@ -34,7 +34,8 @@ a { color: var(--green); text-decoration: none; }
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 0 0;
+  /* iOS standalone draws under the status bar — pad past the notch. */
+  padding: calc(14px + env(safe-area-inset-top)) 0 0;
 }
 .topbar .spacer { flex: 1; }
 .brand { display: flex; align-items: center; gap: 10px; }

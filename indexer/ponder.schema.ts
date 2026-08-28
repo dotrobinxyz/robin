@@ -150,8 +150,11 @@ export const stats = onchainTable("stats", (t) => ({
 }));
 
 /// Gold Band status per node (paid supporter badge; until = unix expiry).
+/// label is the dotted name minus .robin, resolved at event time — lets the
+/// feed announce "x.robin went gold" without a reverse node lookup.
 export const goldBand = onchainTable("gold_band", (t) => ({
   node: t.hex().primaryKey(),
+  label: t.text(),
   until: t.bigint().notNull(),
   updatedAt: t.bigint().notNull(),
 }));
