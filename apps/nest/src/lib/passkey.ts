@@ -33,6 +33,13 @@ function fromB64url(s: string): Uint8Array {
   return out;
 }
 
+/** Copy into a plain ArrayBuffer — the WebAuthn API rejects ArrayBufferLike views. */
+function toBuf(u: Uint8Array): ArrayBuffer {
+  const buf = new ArrayBuffer(u.length);
+  new Uint8Array(buf).set(u);
+  return buf;
+}
+
 /** Create a platform passkey; returns credential id + P-256 public key. */
 export async function createPasskey(
   label: string,
@@ -93,9 +100,9 @@ export async function signWithPasskey(
 ): Promise<PasskeyAuth> {
   const assertion = (await navigator.credentials.get({
     publicKey: {
-      challenge: hexToBytes(digest),
+      challenge: toBuf(hexToBytes(digest)),
       rpId: location.hostname,
-      allowCredentials: [{ type: "public-key", id: fromB64url(credentialId) }],
+      allowCredentials: [{ type: "public-key", id: toBuf(fromB64url(credentialId)) }],
       userVerification: "required",
       timeout: 120_000,
     },
