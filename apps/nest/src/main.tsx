@@ -12,6 +12,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CHAIN, SITE, wagmiConfig } from "./config";
 import { NestTab } from "./tabs/Nest";
 import { PayTab } from "./tabs/Pay";
+import { FeedTab } from "./tabs/Feed";
+import { TradeTab } from "./tabs/Trade";
 import { shortAddress } from "./lib/format";
 import "./styles.css";
 
@@ -173,6 +175,8 @@ function App() {
         </header>
         {tab === "nest" && <NestTab />}
         {tab === "pay" && <PayTab />}
+        {tab === "trade" && <TradeTab />}
+        {tab === "feed" && <FeedTab />}
       </div>
       <nav className="tabbar">
         <button className={tab === "nest" ? "on" : ""} onClick={() => setTab("nest")}>
@@ -183,11 +187,11 @@ function App() {
           <svg className="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18" /><path d="M17 7.5C17 5.5 14.8 4.5 12 4.5S7 5.5 7 7.5 9 10.5 12 10.5s5 1 5 3-2.2 3-5 3-5-1-5-3" /></svg>
           pay
         </button>
-        <button disabled title="coming soon">
+        <button className={tab === "trade" ? "on" : ""} onClick={() => setTab("trade")}>
           <svg className="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17l6-6 4 4 8-8" /><path d="M15 7h6v6" /></svg>
           trade
         </button>
-        <button disabled title="coming soon">
+        <button className={tab === "feed" ? "on" : ""} onClick={() => setTab("feed")}>
           <svg className="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16" /><path d="M4 12h16" /><path d="M4 19h10" /></svg>
           feed
         </button>
