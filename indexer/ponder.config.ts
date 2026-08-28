@@ -6,11 +6,22 @@ import {
   publicResolverAbi,
   reverseRegistrarAbi,
   robinBaseRegistrarAbi,
+  robinGoldBandAbi,
   robinRegistrarControllerAbi,
   robinRegistryAbi,
   robinReservedListAbi,
   robinWrapperAbi,
 } from "./abis/robin";
+
+// Gold Band deployed post-launch (not in the deploy batch record) — its own
+// start block keeps its backfill tiny.
+const GOLD_BAND: Record<string, { address: `0x${string}`; startBlock: number }> =
+  {
+    robinhood: {
+      address: "0x0dA8923A6920c2158cdE378e9aBcCa8a997f5268",
+      startBlock: 48015336,
+    },
+  };
 
 // Network selection: ROBIN_NETWORK ∈ local | robinhood-testnet | robinhood.
 // Addresses come straight from the deploy script's record, so the indexer
@@ -118,6 +129,15 @@ export default createConfig({
       abi: reverseRegistrarAbi,
       address: deployment.ReverseRegistrar as `0x${string}`,
       startBlock,
+    },
+    RobinGoldBand: {
+      chain: "robinhood",
+      abi: robinGoldBandAbi,
+      // Off-mainnet the contract doesn't exist; a far-future start block
+      // keeps the entry inert without making the event names conditional.
+      address: (GOLD_BAND[network]?.address ??
+        "0x0dA8923A6920c2158cdE378e9aBcCa8a997f5268") as `0x${string}`,
+      startBlock: GOLD_BAND[network]?.startBlock ?? 2_000_000_000,
     },
   },
 });

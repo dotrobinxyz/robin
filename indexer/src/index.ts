@@ -2,6 +2,7 @@ import { ponder } from "ponder:registry";
 import {
   addressRecord,
   contenthashRecord,
+  goldBand,
   name,
   primaryName,
   registrationEvent,
@@ -516,6 +517,24 @@ ponder.on("RobinReservedList:ReservationChanged", async ({ event, context }) => 
     })
     .onConflictDoUpdate({
       reserved: event.args.reserved,
+      updatedAt: event.block.timestamp,
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Gold Band (paid supporter badge)
+// ---------------------------------------------------------------------------
+
+ponder.on("RobinGoldBand:GoldExtended", async ({ event, context }) => {
+  await context.db
+    .insert(goldBand)
+    .values({
+      node: event.args.node,
+      until: event.args.until,
+      updatedAt: event.block.timestamp,
+    })
+    .onConflictDoUpdate({
+      until: event.args.until,
       updatedAt: event.block.timestamp,
     });
 });

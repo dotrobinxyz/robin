@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useAccount, useEnsName, useReadContract } from "wagmi";
 import { erc20Abi, type Hex } from "viem";
+import { namehash } from "viem/ens";
+import { GOLD_BAND, goldAbi } from "../lib/gold";
+import { GoldSheet } from "./GoldSheet";
 import {
   SECONDS_PER_YEAR,
   reverseRegistrarAbi,
@@ -38,9 +41,17 @@ export function ManageSheet({
   const [years, setYears] = useState(1);
   const [currency, setCurrency] = useState<"USDG" | "ETH">("USDG");
   const [renewedYears, setRenewedYears] = useState(0);
+  const [goldOpen, setGoldOpen] = useState(false);
   const duration = BigInt(years) * SECONDS_PER_YEAR;
   const full = `${label}.robin`;
   const isPrimary = primary === full;
+
+  const { data: gold, refetch: refetchGold } = useReadContract({
+    address: GOLD_BAND,
+    abi: goldAbi,
+    functionName: "isGold",
+    args: [namehash(full)],
+  });
 
   const { data: usdgQuote } = useReadContract({
     address: ADDRESSES.controller,
@@ -205,6 +216,22 @@ export function ManageSheet({
         </div>
 
         <div className="row between" style={{ marginTop: 20 }}>
+          <span className="small muted">gold band</span>
+          {gold ? (
+            <span className="row" style={{ gap: 8 }}>
+              <span className="tag gold">✦ gold</span>
+              <button className="btn small gold" onClick={() => setGoldOpen(true)}>
+                extend
+              </button>
+            </span>
+          ) : (
+            <button className="btn small gold" onClick={() => setGoldOpen(true)}>
+              ✦ go gold
+            </button>
+          )}
+        </div>
+
+        <div className="row between" style={{ marginTop: 20 }}>
           <span className="small muted">primary name</span>
           {isPrimary ? (
             <span className="tag green">primary ✓</span>
@@ -228,6 +255,15 @@ export function ManageSheet({
           </a>
         </p>
       </div>
+      {goldOpen && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <GoldSheet
+            label={label}
+            onClose={() => setGoldOpen(false)}
+            onDone={() => refetchGold()}
+          />
+        </div>
+      )}
     </div>
   );
 }

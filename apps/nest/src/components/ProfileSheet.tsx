@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useEnsAddress, useEnsName } from "wagmi";
+import { useEnsAddress, useEnsName, useReadContract } from "wagmi";
 import { namehash } from "viem/ens";
 import { useQuery } from "@tanstack/react-query";
 import { EXPLORER, INDEXER_URL } from "../config";
 import { formatEth, shortAddress } from "../lib/format";
+import { GOLD_BAND, goldAbi } from "../lib/gold";
 import { BandChip } from "./BandChip";
+import { GoldSheet } from "./GoldSheet";
 import { PixelBird } from "./PixelBird";
 
 /**
@@ -22,9 +24,16 @@ export function ProfileSheet({
   onPay: (name: string) => void;
 }) {
   const [label, setLabel] = useState(initial);
+  const [goldOpen, setGoldOpen] = useState(false);
   const full = `${label}.robin`;
   const node = namehash(full);
 
+  const { data: gold, refetch: refetchGold } = useReadContract({
+    address: GOLD_BAND,
+    abi: goldAbi,
+    functionName: "isGold",
+    args: [node],
+  });
   const { data: addr } = useEnsAddress({ name: full });
   const resolved = addr && addr !== "0x0000000000000000000000000000000000000000" ? addr : null;
   const { data: ownerPrimary } = useEnsName({
@@ -109,9 +118,12 @@ export function ProfileSheet({
     <div className="sheet-back" onClick={onClose}>
       <div className="sheet scroll" onClick={(e) => e.stopPropagation()}>
         <div className="row" style={{ gap: 12 }}>
-          <PixelBird name={label} size={46} />
+          <PixelBird name={label} size={46} gold={Boolean(gold)} />
           <div style={{ minWidth: 0 }}>
-            <BandChip name={label} size="sm" variant="green-outline" />
+            <span className="row" style={{ gap: 8 }}>
+              <BandChip name={label} size="sm" variant="green-outline" />
+              {gold && <span className="tag gold">✦ gold</span>}
+            </span>
             <p className="small muted mono" style={{ margin: "6px 0 0" }}>
               {resolved
                 ? ownerPrimary && ownerPrimary !== full
@@ -204,6 +216,9 @@ export function ProfileSheet({
           >
             pay {label}
           </button>
+          <button className="btn small gold" onClick={() => setGoldOpen(true)}>
+            {gold ? "✦ extend gold" : "✦ gift gold"}
+          </button>
           {resolved && (
             <a
               className="small mono muted"
@@ -216,6 +231,15 @@ export function ProfileSheet({
           )}
         </div>
       </div>
+      {goldOpen && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <GoldSheet
+            label={label}
+            onClose={() => setGoldOpen(false)}
+            onDone={() => refetchGold()}
+          />
+        </div>
+      )}
     </div>
   );
 }

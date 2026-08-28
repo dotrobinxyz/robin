@@ -52,10 +52,25 @@ const POOL_KEY_COMPONENTS = [
   { name: "hooks", type: "address" },
 ] as const;
 
+/** 0.5% app fee on swap output, split half treasury / half ROBIN buy-and-burn. */
+export const FEE_BIPS_EACH = 25n; // ×2 recipients = 50 bips total
+export const FEE_TOTAL_BIPS = FEE_BIPS_EACH * 2n;
+const SAFE = "0xD0d82499Bfbbc5D92d31BDc46d31d1Fd3eA50a71" as const;
+const BURN_VAULT = "0x2E5BB9d71576cBA89557Cefe4eBE6d2339CFDe07" as const;
+// UniversalRouter sentinel recipients.
+const MSG_SENDER = "0x0000000000000000000000000000000000000001" as const;
+const ADDRESS_THIS = "0x0000000000000000000000000000000000000002" as const;
+
+export function netAfterFee(gross: bigint): bigint {
+  return (gross * (10_000n - FEE_TOTAL_BIPS)) / 10_000n;
+}
+
 /**
- * UniversalRouter calldata for a single-pool v4 exact-in swap:
- * command V4_SWAP (0x10); actions SWAP_EXACT_IN_SINGLE (0x06) +
- * SETTLE_ALL (0x0c) + TAKE_ALL (0x0f). Output goes to the caller.
+ * UniversalRouter calldata for a single-pool v4 exact-in swap with the app
+ * fee: V4_SWAP (0x10) takes output to the router (actions SWAP_EXACT_IN_SINGLE
+ * 0x06 + SETTLE_ALL 0x0c + TAKE 0x0e → ADDRESS_THIS), then PAY_PORTION (0x06)
+ * ×2 peels 25 bips each to treasury + burn vault, and SWEEP (0x04) sends the
+ * rest to the caller with a hard net minimum.
  */
 export function encodeV4Swap(
   zeroForOne: boolean,
@@ -91,15 +106,28 @@ export function encodeV4Swap(
     [{ type: "address" }, { type: "uint256" }],
     [inCurrency, amountIn],
   );
+  // TAKE full open delta to the router itself so the fee legs can split it.
   const take = encodeAbiParameters(
-    [{ type: "address" }, { type: "uint256" }],
-    [outCurrency, minOut],
+    [{ type: "address" }, { type: "address" }, { type: "uint256" }],
+    [outCurrency, ADDRESS_THIS, 0n],
   );
-  const input = encodeAbiParameters(
+  const v4Input = encodeAbiParameters(
     [{ type: "bytes" }, { type: "bytes[]" }],
-    ["0x060c0f", [swapParams, settle, take]],
+    ["0x060c0e", [swapParams, settle, take]],
   );
-  return { commands: "0x10", inputs: [input] };
+  const feeLeg = (recipient: Hex) =>
+    encodeAbiParameters(
+      [{ type: "address" }, { type: "address" }, { type: "uint256" }],
+      [outCurrency, recipient, FEE_BIPS_EACH],
+    );
+  const sweep = encodeAbiParameters(
+    [{ type: "address" }, { type: "address" }, { type: "uint256" }],
+    [outCurrency, MSG_SENDER, netAfterFee(minOut)],
+  );
+  return {
+    commands: "0x10060604",
+    inputs: [v4Input, feeLeg(SAFE), feeLeg(BURN_VAULT), sweep],
+  };
 }
 
 /** Spot price (ROBIN per ETH) from slot0's sqrtPriceX96. */

@@ -178,6 +178,12 @@ a { color: var(--green); text-decoration: none; }
   white-space: nowrap;
 }
 .tag.green { border-color: var(--green); color: var(--green); }
+.tag.gold { border-color: #e8c24a; color: #e8c24a; }
+.btn.gold {
+  background: transparent;
+  border: 1.5px solid #e8c24a;
+  color: #e8c24a;
+}
 .notice { border-radius: 12px; padding: 10px 12px; font-size: 0.85rem; }
 .notice.danger { background: rgba(199, 82, 74, 0.16); color: #e08a7e; }
 .toast {

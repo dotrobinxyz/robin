@@ -4,8 +4,11 @@ import {
   useBalance,
   useEnsAddress,
   useEnsName,
+  useReadContract,
 } from "wagmi";
 import { erc20Abi, parseUnits, type Address } from "viem";
+import { namehash } from "viem/ens";
+import { GOLD_BAND, goldAbi } from "../lib/gold";
 import { useQuery } from "@tanstack/react-query";
 import { renderSVG } from "uqr";
 import { CHAIN, EXPLORER, SITE } from "../config";
@@ -43,6 +46,14 @@ export function PayTab({ prefill }: { prefill?: string }) {
     recipient && recipient !== "0x0000000000000000000000000000000000000000"
       ? (recipient as Address)
       : null;
+
+  const { data: recipientGold } = useReadContract({
+    address: GOLD_BAND,
+    abi: goldAbi,
+    functionName: "isGold",
+    args: full ? [namehash(full)] : undefined,
+    query: { enabled: Boolean(full && resolved) },
+  });
 
   const { data: ethBal } = useBalance({
     address,
@@ -167,6 +178,9 @@ export function PayTab({ prefill }: { prefill?: string }) {
                   : recipient === null
                     ? "no address set"
                     : "…"}
+                {resolved && recipientGold && (
+                  <span style={{ color: "#e8c24a" }}> · ✦ gold</span>
+                )}
               </span>
             </div>
           )}

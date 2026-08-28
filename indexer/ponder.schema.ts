@@ -148,3 +148,10 @@ export const stats = onchainTable("stats", (t) => ({
   ethRevenueWei: t.bigint().notNull().default(0n),
   usdgRevenue: t.bigint().notNull().default(0n),
 }));
+
+/// Gold Band status per node (paid supporter badge; until = unix expiry).
+export const goldBand = onchainTable("gold_band", (t) => ({
+  node: t.hex().primaryKey(),
+  until: t.bigint().notNull(),
+  updatedAt: t.bigint().notNull(),
+}));

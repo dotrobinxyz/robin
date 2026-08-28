@@ -14,6 +14,7 @@ import {
   UNIVERSAL_ROUTER,
   V4_QUOTER,
   encodeV4Swap,
+  netAfterFee,
   permit2Abi,
   quoterAbi,
   spotFromSqrtPrice,
@@ -222,7 +223,11 @@ export function TradeTab() {
   function onSwapped() {
     setDone(
       `swapped ✓ ${amount} ${buying ? "ETH" : "ROBIN"} → ~${
-        quote ? (buying ? `${compact(quote.out)} ROBIN` : formatEth(quote.out)) : ""
+        quote
+          ? buying
+            ? `${compact(netAfterFee(quote.out))} ROBIN`
+            : formatEth(netAfterFee(quote.out))
+          : ""
       }`,
     );
     setAmount("");
@@ -286,14 +291,22 @@ export function TradeTab() {
           <label>receive</label>
           <div className="row" style={{ gap: 10 }}>
             <span className="trade-amt out">
-              {!amountIn ? "—" : quote ? `≈ ${buying ? compact(quote.out) : formatEth(quote.out).replace(" ETH", "")}` : "…"}
+              {!amountIn
+                ? "—"
+                : quote
+                  ? `≈ ${
+                      buying
+                        ? compact(netAfterFee(quote.out))
+                        : formatEth(netAfterFee(quote.out)).replace(" ETH", "")
+                    }`
+                  : "…"}
             </span>
             <TokenChip eth={!buying} />
           </div>
         </div>
 
         <p className="rate-line">
-          {rate ?? "…"} · slippage 1%
+          {rate ?? "…"} · slippage 1% · 0.5% app fee
           {quote && quote.impact > 3 && (
             <span style={{ color: "#e08a7e" }}> · moves price {quote.impact.toFixed(1)}%</span>
           )}

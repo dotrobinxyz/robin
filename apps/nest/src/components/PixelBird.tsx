@@ -44,7 +44,15 @@ export function birdTier(head: string): BirdTier {
   return "common";
 }
 
-export function PixelBird({ name, size = 38 }: { name: string; size?: number }) {
+export function PixelBird({
+  name,
+  size = 38,
+  gold = false,
+}: {
+  name: string;
+  size?: number;
+  gold?: boolean;
+}) {
   const head = name.split(".")[0]!;
   const plume =
     PLUMAGE[parseInt(keccak256(stringToBytes(`plumage:${head}`)).slice(2, 4), 16) % 11]!;
@@ -75,6 +83,7 @@ export function PixelBird({ name, size = 38 }: { name: string; size?: number }) 
         background: tier === "legend" ? GREEN : "#26221D",
         flex: "none",
         display: "block",
+        boxShadow: gold ? "0 0 0 2px #e8c24a" : undefined,
       }}
     >
       {rects}

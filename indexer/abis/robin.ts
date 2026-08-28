@@ -5263,3 +5263,20 @@ export const reverseRegistrarAbi = [
     "anonymous": false
   }
 ] as const;
+
+export const robinGoldBandAbi = [
+  {
+    "type": "event",
+    "name": "GoldExtended",
+    "inputs": [
+      { "name": "node", "type": "bytes32", "indexed": true, "internalType": "bytes32" },
+      { "name": "until", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "payer", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "periods", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "yearly", "type": "bool", "indexed": false, "internalType": "bool" },
+      { "name": "paidInUSDG", "type": "bool", "indexed": false, "internalType": "bool" },
+      { "name": "amountPaid", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  }
+] as const;

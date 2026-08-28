@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAccount } from "wagmi";
+import { namehash } from "viem/ens";
 import { useQuery } from "@tanstack/react-query";
 import { EXPLORER, INDEXER_URL } from "../config";
 import { formatEth, formatUSDG } from "../lib/format";
@@ -21,6 +22,7 @@ type FeedData = {
   totalNames: number;
   feesUsd: number | null;
   todayCount: number;
+  goldNodes: Set<string>;
 };
 
 async function fetchFeed(): Promise<FeedData> {
@@ -37,6 +39,7 @@ async function fetchFeed(): Promise<FeedData> {
             items { id name owner createdAt }
           }
           stats(id: 1) { names ethRevenueWei usdgRevenue }
+          goldBands(limit: 500) { items { node until } }
         }`,
       }),
     }),
@@ -75,12 +78,19 @@ async function fetchFeed(): Promise<FeedData> {
   } catch {
     feesUsd = null;
   }
-  const dayAgo = Date.now() / 1000 - 86400;
+  const nowSec = Date.now() / 1000;
+  const goldNodes = new Set<string>(
+    ((body.data.goldBands?.items ?? []) as { node: string; until: string }[])
+      .filter((g) => Number(g.until) > nowSec)
+      .map((g) => g.node.toLowerCase()),
+  );
+  const dayAgo = nowSec - 86400;
   return {
     items: [...regs, ...subs].sort((a, b) => b.timestamp - a.timestamp).slice(0, 60),
     totalNames: Number(stats.names),
     feesUsd,
     todayCount: regs.filter((r) => r.kind === "registration" && r.timestamp > dayAgo).length,
+    goldNodes,
   };
 }
 
@@ -107,10 +117,18 @@ function NameInline({ label }: { label: string }) {
   );
 }
 
-function Row({ item, onOpen }: { item: FeedItem; onOpen: (label: string) => void }) {
+function Row({
+  item,
+  gold,
+  onOpen,
+}: {
+  item: FeedItem;
+  gold: boolean;
+  onOpen: (label: string) => void;
+}) {
   return (
     <div className="feed-row" role="button" onClick={() => onOpen(item.label)}>
-      <PixelBird name={item.label} />
+      <PixelBird name={item.label} gold={gold} />
       <span className="feed-text">
         <NameInline label={item.label} /> {VERB[item.kind]}
         {item.cost ? ` — ${item.cost}` : ""}
@@ -171,7 +189,13 @@ export function FeedTab({ onPay }: { onPay: (name: string) => void }) {
       )}
       {items.map((i, idx) => (
         <div key={i.key}>
-          <Row item={i} onOpen={setProfile} />
+          <Row
+            item={i}
+            gold={Boolean(
+              data?.goldNodes.has(namehash(`${i.label}.robin`).toLowerCase()),
+            )}
+            onOpen={setProfile}
+          />
           {idx === 2 && !mine && data && data.todayCount > 0 && (
             <div className="feed-row">
               <span className="feed-square">

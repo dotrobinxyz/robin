@@ -183,6 +183,13 @@ verifyApi.get("/verify/:name", async (c) => {
     primary = p[0]?.name ?? null;
   }
 
+  const goldRows = await db
+    .select()
+    .from(schema.goldBand)
+    .where(eq(schema.goldBand.node, node))
+    .limit(1);
+  const goldUntil = goldRows[0]?.until ?? null;
+
   // The accountability chain: every ancestor between the name and the TLD.
   // For sniper1.pons.robin → pons.robin. Who can revoke this agent, in order.
   const operatorChain = await Promise.all(
@@ -237,6 +244,8 @@ verifyApi.get("/verify/:name", async (c) => {
       : null,
     operator: operatorChain[0] ?? null,
     operatorChain,
+    gold: goldUntil != null && goldUntil >= now,
+    goldUntil: goldUntil != null ? str(goldUntil) : null,
     records,
     ticker: tickerBlock(labels, records, owner, rootActive),
     agent: {
