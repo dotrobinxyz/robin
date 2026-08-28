@@ -1,8 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
-import { WagmiProvider, useAccount, useConnect, useDisconnect, useEnsName } from "wagmi";
+import {
+  WagmiProvider,
+  useAccount,
+  useConnect,
+  useDisconnect,
+  useEnsName,
+  useSwitchChain,
+} from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { wagmiConfig } from "./config";
+import { CHAIN, SITE, wagmiConfig } from "./config";
 import { NestTab } from "./tabs/Nest";
 import { PayTab } from "./tabs/Pay";
 import { shortAddress } from "./lib/format";
@@ -20,13 +27,94 @@ const queryClient = new QueryClient({
 
 type Tab = "nest" | "pay" | "trade" | "feed";
 
+function WalletSheet({ onClose }: { onClose: () => void }) {
+  const { connectors, connect, isPending, error } = useConnect();
+  const [copied, setCopied] = useState(false);
+  const metaMask = connectors.find((c) => c.type === "metaMask");
+
+  return (
+    <div className="sheet-back" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <h3 className="card-title" style={{ marginBottom: 4 }}>
+          Connect a wallet.
+        </h3>
+        <p className="small muted" style={{ margin: 0 }}>
+          nest never holds keys — your wallet signs everything.
+        </p>
+        {metaMask && (
+          <button
+            className="wallet-opt"
+            disabled={isPending}
+            onClick={() => connect({ connector: metaMask })}
+          >
+            <span aria-hidden>🦊</span> MetaMask
+            {isPending && (
+              <span className="small muted mono" style={{ marginLeft: "auto" }}>
+                approve in the app…
+              </span>
+            )}
+          </button>
+        )}
+        <p className="small muted" style={{ margin: "16px 0 6px" }}>
+          using another wallet? open this link inside its built-in browser:
+        </p>
+        <div className="row" style={{ gap: 8 }}>
+          <span className="input mono" style={{ flex: 1, padding: "10px 12px", fontSize: 14 }}>
+            dotrobin.xyz/nest
+          </span>
+          <button
+            className="chip"
+            onClick={() =>
+              navigator.clipboard
+                ?.writeText(`${SITE}/nest/`)
+                .then(() => setCopied(true))
+                .catch(() => {})
+            }
+          >
+            {copied ? "copied ✓" : "copy"}
+          </button>
+        </div>
+        {error && (
+          <p className="notice danger" style={{ marginTop: 12, marginBottom: 0 }}>
+            {(error as { shortMessage?: string }).shortMessage ?? error.message}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Connect() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chainId } = useAccount();
   const { connectors, connect } = useConnect();
   const { disconnect } = useDisconnect();
+  const { switchChain, isPending: switching } = useSwitchChain();
   const { data: primary } = useEnsName({ address, query: { enabled: Boolean(address) } });
+  const [sheet, setSheet] = useState(false);
+
+  const wrongChain = isConnected && chainId !== CHAIN.id;
+
+  // Fresh MetaMask sessions land on whatever chain the wallet was last on —
+  // pull them to Robinhood Chain once (adds it if missing). If the user
+  // declines, the chip below stays as a manual switch.
+  useEffect(() => {
+    if (isConnected && chainId !== CHAIN.id) switchChain({ chainId: CHAIN.id });
+    if (isConnected) setSheet(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected]);
 
   if (isConnected && address) {
+    if (wrongChain) {
+      return (
+        <button
+          className="band sm warn"
+          disabled={switching}
+          onClick={() => switchChain({ chainId: CHAIN.id })}
+        >
+          {switching ? "switching…" : "wrong network — tap to fix"}
+        </button>
+      );
+    }
     const label = primary?.replace(/\.robin$/, "");
     return (
       <button
@@ -45,13 +133,27 @@ function Connect() {
       </button>
     );
   }
+
+  // In-wallet browsers and extensions inject a provider — connect it directly,
+  // same as before. No provider (Chrome tab, installed PWA) → offer options.
+  const hasInjected = typeof window !== "undefined" && Boolean((window as any).ethereum);
+  const injectedConnector =
+    connectors.find((c) => c.type === "injected" && c.id !== "injected") ??
+    connectors.find((c) => c.type === "injected");
+
   return (
-    <button
-      className="btn small"
-      onClick={() => connectors[0] && connect({ connector: connectors[0] })}
-    >
-      connect
-    </button>
+    <>
+      <button
+        className="btn small"
+        onClick={() => {
+          if (hasInjected && injectedConnector) connect({ connector: injectedConnector });
+          else setSheet(true);
+        }}
+      >
+        connect
+      </button>
+      {sheet && <WalletSheet onClose={() => setSheet(false)} />}
+    </>
   );
 }
 

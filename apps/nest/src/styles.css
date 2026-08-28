@@ -257,6 +257,45 @@ a { color: var(--green); text-decoration: none; }
 .band.lg { font-size: clamp(18px, 5vw, 26px); padding: 10px 20px; }
 .band.xl { font-size: clamp(20px, 6vw, 32px); padding: 12px 24px; }
 
+/* connect sheet */
+.sheet-back {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-end;
+  z-index: 40;
+}
+.sheet {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-bottom: none;
+  border-radius: 22px 22px 0 0;
+  padding: 20px 20px calc(24px + env(safe-area-inset-bottom));
+}
+.wallet-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: var(--night);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--buff);
+  font-family: var(--ui);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+.wallet-opt:disabled { opacity: 0.6; }
+button.band { background: none; cursor: pointer; }
+.band.warn { border-color: #e08a7e; color: #e08a7e; }
+
 /* qr */
 .qr-tile {
   background: #fff;

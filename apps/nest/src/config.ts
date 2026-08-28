@@ -1,5 +1,5 @@
 import { http, createConfig } from "wagmi";
-import { injected } from "wagmi/connectors";
+import { injected, metaMask } from "wagmi/connectors";
 import { defineChain } from "viem";
 import { robinAddressesFrom, withRobin, type RobinAddresses } from "robin-names";
 
@@ -44,6 +44,18 @@ export const SITE = "https://dotrobin.xyz";
 
 export const wagmiConfig = createConfig({
   chains: [CHAIN],
-  connectors: [injected()],
+  // injected covers in-wallet browsers + extensions; metaMask (SDK) covers
+  // Chrome/installed-PWA where no provider is injected — it deeplinks to the
+  // MetaMask app and relays the session back.
+  connectors: [
+    injected(),
+    metaMask({
+      dappMetadata: {
+        name: "nest — .robin",
+        url: `${SITE}/nest/`,
+        iconUrl: `${SITE}/nest/icon-512.png`,
+      },
+    }),
+  ],
   transports: { [CHAIN.id]: http() },
 });
