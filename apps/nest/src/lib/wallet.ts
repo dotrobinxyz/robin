@@ -90,14 +90,20 @@ export function walletDigest(
   );
 }
 
+export type SendPhase = "prepare" | "sign" | "relay";
+
 /** Sign a batch with Face ID and submit through the relayer. */
 export async function sendBatch(
   wallet: NestWallet,
   calls: WalletCall[],
+  onPhase?: (phase: SendPhase) => void,
 ): Promise<{ txHash: Hex; status: string }> {
+  onPhase?.("prepare");
   const info = await accountInfo(wallet.x, wallet.y);
   const digest = walletDigest(wallet.address, BigInt(info.nonce), calls);
+  onPhase?.("sign");
   const auth: PasskeyAuth = await signWithPasskey(wallet.credentialId, digest);
+  onPhase?.("relay");
   const res = await fetch(`${RELAY}/relay`, {
     method: "POST",
     headers: { "content-type": "application/json" },

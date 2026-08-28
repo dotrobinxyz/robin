@@ -54,10 +54,9 @@ function WalletSheet({
           nest never holds keys — your wallet signs everything.
         </p>
         <button className="wallet-opt" onClick={onNestWallet}>
-          <span aria-hidden>⚡</span> nest wallet
-          <span className="tag" style={{ marginLeft: "auto" }}>
-            beta · no seed phrase
-          </span>
+          <svg style={{ width: 18, height: 18 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7.5C4 6.1 5.1 5 6.5 5H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7.5z" /><path d="M20 10h-4.5a2 2 0 0 0 0 4H20" /></svg>
+          nest wallet
+          <span className="tag" style={{ marginLeft: "auto" }}>beta</span>
         </button>
         {metaMask && (
           <button
@@ -245,7 +244,7 @@ function App() {
           </span>
           <div className="spacer" />
           <button className="bell" title="nest wallet" onClick={() => setNestWalletOpen(true)}>
-            ⚡
+            <svg className="ico" style={{ width: 16, height: 16 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7.5C4 6.1 5.1 5 6.5 5H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7.5z" /><path d="M20 10h-4.5a2 2 0 0 0 0 4H20" /></svg>
           </button>
           <Connect onNestWallet={() => setNestWalletOpen(true)} />
         </header>

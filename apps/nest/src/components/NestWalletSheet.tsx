@@ -12,6 +12,7 @@ import {
   sendBatch,
   storedWallet,
   type NestWallet,
+  type SendPhase,
 } from "../lib/wallet";
 
 /**
@@ -23,10 +24,11 @@ export function NestWalletSheet({ onClose }: { onClose: () => void }) {
   const publicClient = usePublicClient();
   const [wallet, setWallet] = useState<NestWallet | null>(() => storedWallet());
   const [busy, setBusy] = useState(false);
+  const [phase, setPhase] = useState<SendPhase | null>(null);
   const [error, setError] = useState("");
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
-  const [sent, setSent] = useState<string | null>(null);
+  const [sent, setSent] = useState<{ tx: string; amount: string; to: string } | null>(null);
 
   const { data: balance, refetch } = useQuery({
     queryKey: ["nest-wallet-balance", wallet?.address],
@@ -78,17 +80,22 @@ export function NestWalletSheet({ onClose }: { onClose: () => void }) {
     setBusy(true);
     setError("");
     setSent(null);
+    const sentAmount = amount.trim();
+    const sentTo = full ? full.replace(/\.robin$/, "") : shortAddress(recipient);
     try {
-      const res = await sendBatch(wallet, [
-        { target: recipient, value: units, data: "0x" },
-      ]);
-      setSent(res.txHash);
+      const res = await sendBatch(
+        wallet,
+        [{ target: recipient, value: units, data: "0x" }],
+        setPhase,
+      );
+      setSent({ tx: res.txHash, amount: sentAmount, to: sentTo });
       setAmount("");
       refetch();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
+      setPhase(null);
     }
   }
 
@@ -105,12 +112,10 @@ export function NestWalletSheet({ onClose }: { onClose: () => void }) {
         {!wallet ? (
           <>
             <p className="small muted" style={{ margin: "12px 0 0" }}>
-              a wallet with no seed phrase: the key is a passkey in your
-              phone's secure chip, unlocked by Face ID / fingerprint, synced
-              by iCloud or Google. transactions are free — nest pays the gas.
+              no seed phrase — your passkey is the key. nest pays the gas.
             </p>
             <p className="small muted" style={{ margin: "8px 0 0" }}>
-              beta rule: pocket money only while it earns trust.
+              beta: pocket money only.
             </p>
             <button
               className="btn block"
@@ -119,7 +124,7 @@ export function NestWalletSheet({ onClose }: { onClose: () => void }) {
               onClick={create}
             >
               {busy ? <span className="progress-ring" /> : null}
-              create with Face ID / fingerprint
+              create wallet
             </button>
           </>
         ) : (
@@ -181,15 +186,34 @@ export function NestWalletSheet({ onClose }: { onClose: () => void }) {
               onClick={send}
             >
               {busy ? <span className="progress-ring" /> : null}
-              send — Face ID confirms
+              {phase === "prepare"
+                ? "…"
+                : phase === "sign"
+                  ? "confirm…"
+                  : phase === "relay"
+                    ? "sending…"
+                    : "send"}
             </button>
             {sent && (
-              <p className="small mono" style={{ marginTop: 10 }}>
-                sent ✓{" "}
-                <a href={`${EXPLORER}/tx/${sent}`} target="_blank" rel="noreferrer">
-                  view tx ↗
-                </a>
-              </p>
+              <div className="sent-pop">
+                <svg className="sent-check" viewBox="0 0 52 52">
+                  <circle cx="26" cy="26" r="24" />
+                  <path d="M15 27l8 8 15-16" />
+                </svg>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontWeight: 600 }}>
+                    {sent.amount} ETH → {sent.to}
+                  </div>
+                  <a
+                    className="small mono"
+                    href={`${EXPLORER}/tx/${sent.tx}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    delivered · view tx ↗
+                  </a>
+                </div>
+              </div>
             )}
             <button
               className="chip"
