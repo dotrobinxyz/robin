@@ -1,6 +1,11 @@
 import { encodeAbiParameters, keccak256, type Address, type Hex } from "viem";
 import { CHAIN } from "../config";
-import { createPasskey, signWithPasskey, type PasskeyAuth } from "./passkey";
+import {
+  assertForRecovery,
+  createPasskey,
+  signWithPasskey,
+  type PasskeyAuth,
+} from "./passkey";
 
 /**
  * The nest wallet client: a RobinAccount smart wallet owned by this
@@ -36,11 +41,49 @@ export function forgetWallet(): void {
 export async function accountInfo(
   x: string,
   y: string,
-): Promise<{ address: Address; deployed: boolean; nonce: string }> {
+): Promise<{ address: Address; deployed: boolean; nonce: string; balance?: string }> {
   const res = await fetch(`${RELAY}/account/${x}/${y}`);
   const body = await res.json();
   if (!res.ok) throw new Error(body.error ?? "relayer unreachable");
   return body;
+}
+
+/**
+ * Rebuild the wallet pointer from nothing but the passkey: recover public
+ * key candidates from a fresh signature, identify the right account by
+ * on-chain use (deployed or funded), or — for never-used wallets — by
+ * intersecting the candidates of a second signature.
+ */
+export async function recoverWallet(): Promise<NestWallet> {
+  const first = await assertForRecovery();
+  const infos = await Promise.all(
+    first.candidates.map(async (c) => ({
+      c,
+      info: await accountInfo(c.x.toString(), c.y.toString()),
+    })),
+  );
+  const used = infos.filter(
+    ({ info }) => info.deployed || BigInt(info.balance ?? "0") > 0n,
+  );
+  let chosen = used.length === 1 ? used[0]! : null;
+  if (!chosen && used.length === 0) {
+    const second = await assertForRecovery();
+    if (second.credentialId !== first.credentialId) {
+      throw new Error("pick the same passkey both times");
+    }
+    const keys = new Set(second.candidates.map((k) => `${k.x}:${k.y}`));
+    const matches = infos.filter(({ c }) => keys.has(`${c.x}:${c.y}`));
+    if (matches.length === 1) chosen = matches[0]!;
+  }
+  if (!chosen) throw new Error("could not identify the wallet");
+  const wallet: NestWallet = {
+    credentialId: first.credentialId,
+    x: chosen.c.x.toString(),
+    y: chosen.c.y.toString(),
+    address: chosen.info.address,
+  };
+  localStorage.setItem(KEY, JSON.stringify(wallet));
+  return wallet;
 }
 
 /** Create the passkey + resolve the counterfactual account address. */

@@ -160,7 +160,10 @@ app.get("/account/:x/:y", async (c) => {
     functionName: "getAddress",
     args: [x, y],
   });
-  const code = await publicClient.getCode({ address });
+  const [code, balance] = await Promise.all([
+    publicClient.getCode({ address }),
+    publicClient.getBalance({ address }),
+  ]);
   const nonce =
     code && code !== "0x"
       ? await publicClient.readContract({ address, abi: accountAbi, functionName: "nonce" })
@@ -169,6 +172,7 @@ app.get("/account/:x/:y", async (c) => {
     address,
     deployed: Boolean(code && code !== "0x"),
     nonce: nonce.toString(),
+    balance: balance.toString(),
   });
 });
 

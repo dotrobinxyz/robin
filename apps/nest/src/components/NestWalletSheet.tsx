@@ -10,6 +10,7 @@ import { toFullName } from "../lib/names";
 import {
   createWallet,
   forgetWallet,
+  recoverWallet,
   sendBatch,
   storedWallet,
   type NestWallet,
@@ -128,6 +129,25 @@ export function NestWalletSheet({ onClose }: { onClose: () => void }) {
             >
               {busy ? <span className="progress-ring" /> : null}
               create wallet
+            </button>
+            <button
+              className="btn block secondary"
+              style={{ marginTop: 10 }}
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                setError("");
+                try {
+                  setWallet(await recoverWallet());
+                  refreshActive();
+                } catch (e) {
+                  setError(e instanceof Error ? e.message : String(e));
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              recover
             </button>
           </>
         ) : (

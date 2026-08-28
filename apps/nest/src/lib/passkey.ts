@@ -93,6 +93,68 @@ function parseDerSignature(der: Uint8Array): { r: bigint; s: bigint } {
   return { r, s };
 }
 
+/**
+ * Recovery assertion: let the user pick their passkey (no stored pointer
+ * needed — resident credentials are discoverable), then mathematically
+ * recover the P-256 public key candidates from the signature itself.
+ * ECDSA recovery yields two candidates; the caller disambiguates via
+ * on-chain state or a second assertion.
+ */
+export async function assertForRecovery(): Promise<{
+  credentialId: string;
+  candidates: { x: bigint; y: bigint }[];
+}> {
+  const { p256 } = await import("@noble/curves/p256");
+  const assertion = (await navigator.credentials.get({
+    publicKey: {
+      challenge: toBuf(crypto.getRandomValues(new Uint8Array(32))),
+      rpId: location.hostname,
+      userVerification: "required",
+      timeout: 120_000,
+    },
+  })) as PublicKeyCredential | null;
+  if (!assertion) throw new Error("recovery cancelled");
+  const response = assertion.response as AuthenticatorAssertionResponse;
+
+  const clientHash = new Uint8Array(
+    await crypto.subtle.digest("SHA-256", response.clientDataJSON),
+  );
+  const authData = new Uint8Array(response.authenticatorData);
+  const signed = new Uint8Array(authData.length + clientHash.length);
+  signed.set(authData);
+  signed.set(clientHash, authData.length);
+  const msgHash = new Uint8Array(await crypto.subtle.digest("SHA-256", signed));
+
+  // Raw (r, s) — do NOT low-s normalize here; recovery needs the original.
+  const der = new Uint8Array(response.signature);
+  if (der[0] !== 0x30) throw new Error("bad signature");
+  let offset = 2;
+  if (der[1]! & 0x80) offset = 2 + (der[1]! & 0x7f);
+  const readInt = (): bigint => {
+    const len = der[offset + 1]!;
+    const bytes = der.slice(offset + 2, offset + 2 + len);
+    offset += 2 + len;
+    return BigInt(bytesToHex(bytes));
+  };
+  const r = readInt();
+  const s = readInt();
+
+  const candidates: { x: bigint; y: bigint }[] = [];
+  for (const bit of [0, 1]) {
+    try {
+      const point = new p256.Signature(r, s)
+        .addRecoveryBit(bit)
+        .recoverPublicKey(msgHash)
+        .toAffine();
+      candidates.push({ x: point.x, y: point.y });
+    } catch {
+      // that recovery bit doesn't produce a valid point — skip
+    }
+  }
+  if (candidates.length === 0) throw new Error("could not recover key");
+  return { credentialId: b64url(new Uint8Array(assertion.rawId)), candidates };
+}
+
 /** Sign a 32-byte digest with the stored passkey (Face ID / fingerprint). */
 export async function signWithPasskey(
   credentialId: string,
