@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
 import { robinBaseRegistrarAbi, robinTokenId } from "robin-names";
 import { ADDRESSES, EXPLORER, INDEXER_URL, SITE } from "../config";
 import { formatDate, formatEth } from "../lib/format";
 import { BandChip } from "../components/BandChip";
+import { ManageSheet } from "../components/ManageSheet";
 
 type IndexedName = {
   id: string;
@@ -41,7 +43,8 @@ async function fetchOwned(owner: string): Promise<{
 }
 
 /** One bird: on-chain art straight from the registrar's tokenURI. */
-function BirdCard({ name }: { name: IndexedName }) {
+function BirdCard({ name, onChanged }: { name: IndexedName; onChanged: () => void }) {
+  const [managing, setManaging] = useState(false);
   const { data: uri } = useReadContract({
     address: ADDRESSES.baseRegistrar,
     abi: robinBaseRegistrarAbi,
@@ -71,15 +74,18 @@ function BirdCard({ name }: { name: IndexedName }) {
         <span className="exp">
           {soon ? "⚠ " : ""}expires {formatDate(name.expiresAt)}
         </span>
-        <a
-          className="btn small"
-          href={`${SITE}/name/${name.label}`}
-          target="_blank"
-          rel="noreferrer"
-        >
+        <button className="btn small" onClick={() => setManaging(true)}>
           manage
-        </a>
+        </button>
       </div>
+      {managing && (
+        <ManageSheet
+          label={name.label!}
+          expiresAt={name.expiresAt}
+          onClose={() => setManaging(false)}
+          onChanged={onChanged}
+        />
+      )}
     </div>
   );
 }
@@ -161,7 +167,7 @@ function Tokens({ address }: { address: `0x${string}` }) {
 
 export function NestTab() {
   const { address, isConnected } = useAccount();
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ["nest-owned", address],
     enabled: Boolean(address),
     refetchInterval: 30_000,
@@ -194,7 +200,7 @@ export function NestTab() {
         </div>
       )}
       {named.map((n) => (
-        <BirdCard key={n.id} name={n} />
+        <BirdCard key={n.id} name={n} onChanged={() => refetch()} />
       ))}
       {(data?.subnames ?? []).length > 0 && (
         <div className="card">
