@@ -13,6 +13,7 @@ import { namehash } from "viem/ens";
 import { useReadContract } from "wagmi";
 import { CHAIN, SITE, wagmiConfig } from "./config";
 import { GOLD_BAND, goldAbi } from "./lib/gold";
+import { NestWalletSheet } from "./components/NestWalletSheet";
 import { NestTab } from "./tabs/Nest";
 import { PayTab } from "./tabs/Pay";
 import { FeedTab } from "./tabs/Feed";
@@ -32,7 +33,13 @@ const queryClient = new QueryClient({
 
 type Tab = "nest" | "pay" | "trade" | "feed";
 
-function WalletSheet({ onClose }: { onClose: () => void }) {
+function WalletSheet({
+  onClose,
+  onNestWallet,
+}: {
+  onClose: () => void;
+  onNestWallet: () => void;
+}) {
   const { connectors, connect, isPending, error } = useConnect();
   const [copied, setCopied] = useState(false);
   const metaMask = connectors.find((c) => c.type === "metaMask");
@@ -46,6 +53,12 @@ function WalletSheet({ onClose }: { onClose: () => void }) {
         <p className="small muted" style={{ margin: 0 }}>
           nest never holds keys — your wallet signs everything.
         </p>
+        <button className="wallet-opt" onClick={onNestWallet}>
+          <span aria-hidden>⚡</span> nest wallet
+          <span className="tag" style={{ marginLeft: "auto" }}>
+            beta · no seed phrase
+          </span>
+        </button>
         {metaMask && (
           <button
             className="wallet-opt"
@@ -89,7 +102,7 @@ function WalletSheet({ onClose }: { onClose: () => void }) {
   );
 }
 
-function Connect() {
+function Connect({ onNestWallet }: { onNestWallet: () => void }) {
   const { address, isConnected, chainId } = useAccount();
   const { connectors, connect } = useConnect();
   const { disconnect } = useDisconnect();
@@ -199,7 +212,15 @@ function Connect() {
       >
         connect
       </button>
-      {sheet && <WalletSheet onClose={() => setSheet(false)} />}
+      {sheet && (
+        <WalletSheet
+          onClose={() => setSheet(false)}
+          onNestWallet={() => {
+            setSheet(false);
+            onNestWallet();
+          }}
+        />
+      )}
     </>
   );
 }
@@ -207,6 +228,7 @@ function Connect() {
 function App() {
   const [tab, setTab] = useState<Tab>("nest");
   const [payTo, setPayTo] = useState("");
+  const [nestWalletOpen, setNestWalletOpen] = useState(false);
 
   const openPay = (name: string) => {
     setPayTo(name);
@@ -222,8 +244,12 @@ function App() {
             <span className="wordmark">nest</span>
           </span>
           <div className="spacer" />
-          <Connect />
+          <button className="bell" title="nest wallet" onClick={() => setNestWalletOpen(true)}>
+            ⚡
+          </button>
+          <Connect onNestWallet={() => setNestWalletOpen(true)} />
         </header>
+        {nestWalletOpen && <NestWalletSheet onClose={() => setNestWalletOpen(false)} />}
         {tab === "nest" && <NestTab onPay={openPay} />}
         {tab === "pay" && <PayTab prefill={payTo} />}
         {tab === "trade" && <TradeTab />}
